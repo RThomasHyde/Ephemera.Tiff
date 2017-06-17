@@ -244,10 +244,10 @@ namespace TiffDocumentTest
         private static void FieldCheckCramps(TiffDocument tiffDoc)
         {
             Assert.Equal(1, tiffDoc.PageCount);
-            Assert.Equal(14, tiffDoc.Directories[0].Tags.Count);
+            Assert.Equal(14, tiffDoc.Directories[0].Fields.Count);
             Assert.Equal(800, tiffDoc.Directories[0][TiffTag.ImageWidth].GetValue<int>());
-            Assert.Equal(607, tiffDoc.Directories[0][TiffTag.ImageHeight].GetValue<int>());
-            Assert.Equal(CompressionType.PackBits, tiffDoc.Directories[0].CompressionType);
+            Assert.Equal(607, tiffDoc.Directories[0][TiffTag.ImageLength].GetValue<int>());
+            Assert.Equal(CompressionType.PACKBITS, tiffDoc.Directories[0].CompressionType);
             Assert.Equal(1, tiffDoc.Directories[0][TiffTag.Orientation].GetValue<int>());
             Assert.Equal(72d, tiffDoc.Directories[0][TiffTag.XResolution].GetValue<double>());
             Assert.Equal(72d, tiffDoc.Directories[0][TiffTag.YResolution].GetValue<double>());
@@ -264,10 +264,10 @@ namespace TiffDocumentTest
         private static void FieldCheckCrampsTiled(TiffDocument tiffDoc)
         {
             Assert.Equal(1, tiffDoc.PageCount);
-            Assert.Equal(18, tiffDoc.Directories[0].Tags.Count);
+            Assert.Equal(18, tiffDoc.Directories[0].Fields.Count);
             Assert.Equal(800, tiffDoc.Directories[0][TiffTag.ImageWidth].GetValue<int>());
-            Assert.Equal(607, tiffDoc.Directories[0][TiffTag.ImageHeight].GetValue<int>());
-            Assert.Equal(CompressionType.None, tiffDoc.Directories[0].CompressionType);
+            Assert.Equal(607, tiffDoc.Directories[0][TiffTag.ImageLength].GetValue<int>());
+            Assert.Equal(CompressionType.NONE, tiffDoc.Directories[0].CompressionType);
             Assert.Equal(1, tiffDoc.Directories[0][TiffTag.Orientation].GetValue<int>());
             Assert.Equal(8, tiffDoc.Directories[0][TiffTag.BitsPerSample].GetValue<int>());
             Assert.Equal(1, tiffDoc.Directories[0][TiffTag.SamplesPerPixel].GetValue<int>());
@@ -288,9 +288,9 @@ namespace TiffDocumentTest
         private static void FieldCheckFax2D(TiffDocument tiffDoc)
         {
             Assert.Equal(1, tiffDoc.PageCount);
-            Assert.Equal(21, tiffDoc.Directories[0].Tags.Count);
+            Assert.Equal(21, tiffDoc.Directories[0].Fields.Count);
             Assert.Equal(1728, tiffDoc.Directories[0][TiffTag.ImageWidth].GetValue<int>());
-            Assert.Equal(1082, tiffDoc.Directories[0][TiffTag.ImageHeight].GetValue<int>());
+            Assert.Equal(1082, tiffDoc.Directories[0][TiffTag.ImageLength].GetValue<int>());
             Assert.Equal(1, tiffDoc.Directories[0][TiffTag.BitsPerSample].GetValue<int>());
             Assert.Equal(CompressionType.CCITT_T4, tiffDoc.Directories[0].CompressionType);
             Assert.Equal(0, tiffDoc.Directories[0][TiffTag.PhotometricInterpretation].GetValue<int>());
@@ -315,9 +315,9 @@ namespace TiffDocumentTest
         private static void FieldCheckG3Test(TiffDocument tiffDoc)
         {
             Assert.Equal(1, tiffDoc.PageCount);
-            Assert.Equal(21, tiffDoc.Directories[0].Tags.Count);
+            Assert.Equal(21, tiffDoc.Directories[0].Fields.Count);
             Assert.Equal(1728, tiffDoc.Directories[0][TiffTag.ImageWidth].GetValue<int>());
-            Assert.Equal(1103, tiffDoc.Directories[0][TiffTag.ImageHeight].GetValue<int>());
+            Assert.Equal(1103, tiffDoc.Directories[0][TiffTag.ImageLength].GetValue<int>());
             Assert.Equal(1, tiffDoc.Directories[0][TiffTag.BitsPerSample].GetValue<int>());
             Assert.Equal(CompressionType.CCITT_T4, tiffDoc.Directories[0].CompressionType);
             Assert.Equal(0, tiffDoc.Directories[0][TiffTag.PhotometricInterpretation].GetValue<int>());
@@ -342,11 +342,11 @@ namespace TiffDocumentTest
         private static void FieldCheckJello(TiffDocument tiffDoc)
         {
             Assert.Equal(1, tiffDoc.PageCount);
-            Assert.Equal(12, tiffDoc.Directories[0].Tags.Count);
+            Assert.Equal(12, tiffDoc.Directories[0].Fields.Count);
             Assert.Equal(256, tiffDoc.Directories[0][TiffTag.ImageWidth].GetValue<int>());
-            Assert.Equal(192, tiffDoc.Directories[0][TiffTag.ImageHeight].GetValue<int>());
+            Assert.Equal(192, tiffDoc.Directories[0][TiffTag.ImageLength].GetValue<int>());
             Assert.Equal(8, tiffDoc.Directories[0][TiffTag.BitsPerSample].GetValue<int>());
-            Assert.Equal(CompressionType.PackBits, tiffDoc.Directories[0].CompressionType);
+            Assert.Equal(CompressionType.PACKBITS, tiffDoc.Directories[0].CompressionType);
             Assert.Equal(3, tiffDoc.Directories[0][TiffTag.PhotometricInterpretation].GetValue<int>());
             Assert.Equal(6, tiffDoc.Directories[0][TiffTag.StripOffsets].GetValues<int>().Count());
             Assert.Equal(1, tiffDoc.Directories[0][TiffTag.Orientation].GetValue<int>());
@@ -360,12 +360,12 @@ namespace TiffDocumentTest
         private static void FieldCheckJim___Ah(TiffDocument tiffDoc)
         {
             Assert.Equal(1, tiffDoc.PageCount);
-            Assert.Equal(14, tiffDoc.Directories[0].Tags.Count);
+            Assert.Equal(14, tiffDoc.Directories[0].Fields.Count);
             Assert.Equal(0, tiffDoc.Directories[0][TiffTag.NewSubfileType].GetValue<int>());
             Assert.Equal(664, tiffDoc.Directories[0][TiffTag.ImageWidth].GetValue<int>());
-            Assert.Equal(813, tiffDoc.Directories[0][TiffTag.ImageHeight].GetValue<int>());
+            Assert.Equal(813, tiffDoc.Directories[0][TiffTag.ImageLength].GetValue<int>());
             Assert.Equal(1, tiffDoc.Directories[0][TiffTag.BitsPerSample].GetValue<int>());
-            Assert.Equal(CompressionType.None, tiffDoc.Directories[0].CompressionType);
+            Assert.Equal(CompressionType.NONE, tiffDoc.Directories[0].CompressionType);
             Assert.Equal(0, tiffDoc.Directories[0][TiffTag.PhotometricInterpretation].GetValue<int>());
             Assert.Equal(2, tiffDoc.Directories[0][TiffTag.Thresholding].GetValue<int>());
             Assert.Equal(1, tiffDoc.Directories[0][TiffTag.StripOffsets].GetValues<int>().Count());
@@ -380,14 +380,14 @@ namespace TiffDocumentTest
         private static void FieldCheckJim___Cg(TiffDocument tiffDoc)
         {
             Assert.Equal(1, tiffDoc.PageCount);
-            Assert.Equal(14, tiffDoc.Directories[0].Tags.Count);
+            Assert.Equal(14, tiffDoc.Directories[0].Fields.Count);
             Assert.Equal(0, tiffDoc.Directories[0][TiffTag.NewSubfileType].GetValue<int>());
             Assert.Equal(277, tiffDoc.Directories[0][TiffTag.ImageWidth].GetValue<int>());
-            Assert.Equal(339, tiffDoc.Directories[0][TiffTag.ImageHeight].GetValue<int>());
+            Assert.Equal(339, tiffDoc.Directories[0][TiffTag.ImageLength].GetValue<int>());
             Assert.Equal(8, tiffDoc.Directories[0][TiffTag.BitsPerSample].GetValue<int>());
-            Assert.Equal(CompressionType.None, tiffDoc.Directories[0].CompressionType);
+            Assert.Equal(CompressionType.NONE, tiffDoc.Directories[0].CompressionType);
             Assert.Equal(1, tiffDoc.Directories[0][TiffTag.PhotometricInterpretation].GetValue<int>());
-            Assert.Equal((uint)198, tiffDoc.Directories[0][TiffTag.StripOffsets].GetValue<uint>());
+            Assert.Equal(1, tiffDoc.Directories[0][TiffTag.StripOffsets].Count);
             Assert.Equal(1, tiffDoc.Directories[0][TiffTag.SamplesPerPixel].GetValue<int>());
             Assert.Equal(339, tiffDoc.Directories[0][TiffTag.RowsPerStrip].GetValue<int>());
             Assert.Equal(93903, tiffDoc.Directories[0][TiffTag.StripByteCounts].GetValue<int>());
@@ -401,14 +401,14 @@ namespace TiffDocumentTest
         private static void FieldCheckJim___Dg(TiffDocument tiffDoc)
         {
             Assert.Equal(1, tiffDoc.PageCount);
-            Assert.Equal(13, tiffDoc.Directories[0].Tags.Count);
+            Assert.Equal(13, tiffDoc.Directories[0].Fields.Count);
             Assert.Equal(0, tiffDoc.Directories[0][TiffTag.NewSubfileType].GetValue<int>());
             Assert.Equal(277, tiffDoc.Directories[0][TiffTag.ImageWidth].GetValue<int>());
-            Assert.Equal(339, tiffDoc.Directories[0][TiffTag.ImageHeight].GetValue<int>());
+            Assert.Equal(339, tiffDoc.Directories[0][TiffTag.ImageLength].GetValue<int>());
             Assert.Equal(8, tiffDoc.Directories[0][TiffTag.BitsPerSample].GetValue<int>());
-            Assert.Equal(CompressionType.None, tiffDoc.Directories[0].CompressionType);
+            Assert.Equal(CompressionType.NONE, tiffDoc.Directories[0].CompressionType);
             Assert.Equal(0, tiffDoc.Directories[0][TiffTag.PhotometricInterpretation].GetValue<int>());
-            Assert.Equal((uint)186, tiffDoc.Directories[0][TiffTag.StripOffsets].GetValue<uint>());
+            Assert.Equal(1, tiffDoc.Directories[0][TiffTag.StripOffsets].Count);
             Assert.Equal(1, tiffDoc.Directories[0][TiffTag.SamplesPerPixel].GetValue<int>());
             Assert.Equal(339, tiffDoc.Directories[0][TiffTag.RowsPerStrip].GetValue<int>());
             Assert.Equal(93903, tiffDoc.Directories[0][TiffTag.StripByteCounts].GetValue<int>());
@@ -420,14 +420,14 @@ namespace TiffDocumentTest
         private static void FieldCheckJim___Gg(TiffDocument tiffDoc)
         {
             Assert.Equal(1, tiffDoc.PageCount);
-            Assert.Equal(14, tiffDoc.Directories[0].Tags.Count);
+            Assert.Equal(14, tiffDoc.Directories[0].Fields.Count);
             Assert.Equal(0, tiffDoc.Directories[0][TiffTag.NewSubfileType].GetValue<int>());
             Assert.Equal(277, tiffDoc.Directories[0][TiffTag.ImageWidth].GetValue<int>());
-            Assert.Equal(339, tiffDoc.Directories[0][TiffTag.ImageHeight].GetValue<int>());
+            Assert.Equal(339, tiffDoc.Directories[0][TiffTag.ImageLength].GetValue<int>());
             Assert.Equal(8, tiffDoc.Directories[0][TiffTag.BitsPerSample].GetValue<int>());
-            Assert.Equal(CompressionType.None, tiffDoc.Directories[0].CompressionType);
+            Assert.Equal(CompressionType.NONE, tiffDoc.Directories[0].CompressionType);
             Assert.Equal(0, tiffDoc.Directories[0][TiffTag.PhotometricInterpretation].GetValue<int>());
-            Assert.Equal((uint)198, tiffDoc.Directories[0][TiffTag.StripOffsets].GetValue<uint>());
+            Assert.Equal(1, tiffDoc.Directories[0][TiffTag.StripOffsets].Count);
             Assert.Equal(1, tiffDoc.Directories[0][TiffTag.SamplesPerPixel].GetValue<int>());
             Assert.Equal(339, tiffDoc.Directories[0][TiffTag.RowsPerStrip].GetValue<int>());
             Assert.Equal(93903, tiffDoc.Directories[0][TiffTag.StripByteCounts].GetValue<int>());
@@ -440,9 +440,9 @@ namespace TiffDocumentTest
         private static void FieldCheckOff_L16(TiffDocument tiffDoc)
         {
             Assert.Equal(1, tiffDoc.PageCount);
-            Assert.Equal(16, tiffDoc.Directories[0].Tags.Count);
+            Assert.Equal(16, tiffDoc.Directories[0].Fields.Count);
             Assert.Equal(333, tiffDoc.Directories[0][TiffTag.ImageWidth].GetValue<int>());
-            Assert.Equal(225, tiffDoc.Directories[0][TiffTag.ImageHeight].GetValue<int>());
+            Assert.Equal(225, tiffDoc.Directories[0][TiffTag.ImageLength].GetValue<int>());
             Assert.Equal(16, tiffDoc.Directories[0][TiffTag.BitsPerSample].GetValue<int>());
             Assert.Equal((ushort)34676, tiffDoc.Directories[0][TiffTag.Compression].GetValue<ushort>());
             Assert.Equal(32844, tiffDoc.Directories[0][TiffTag.PhotometricInterpretation].GetValue<int>());
@@ -462,9 +462,9 @@ namespace TiffDocumentTest
         private static void FieldCheckOff_Luv24(TiffDocument tiffDoc)
         {
             Assert.Equal(1, tiffDoc.PageCount);
-            Assert.Equal(16, tiffDoc.Directories[0].Tags.Count);
+            Assert.Equal(16, tiffDoc.Directories[0].Fields.Count);
             Assert.Equal(333, tiffDoc.Directories[0][TiffTag.ImageWidth].GetValue<int>());
-            Assert.Equal(225, tiffDoc.Directories[0][TiffTag.ImageHeight].GetValue<int>());
+            Assert.Equal(225, tiffDoc.Directories[0][TiffTag.ImageLength].GetValue<int>());
             Assert.Equal(new[] {16, 16, 16}, tiffDoc.Directories[0][TiffTag.BitsPerSample].GetValues<int>());
             Assert.Equal((ushort)34677, tiffDoc.Directories[0][TiffTag.Compression].GetValue<ushort>());
             Assert.Equal(32845, tiffDoc.Directories[0][TiffTag.PhotometricInterpretation].GetValue<int>());
@@ -484,9 +484,9 @@ namespace TiffDocumentTest
         private static void FieldCheckOff_Luv32(TiffDocument tiffDoc)
         {
             Assert.Equal(1, tiffDoc.PageCount);
-            Assert.Equal(16, tiffDoc.Directories[0].Tags.Count);
+            Assert.Equal(16, tiffDoc.Directories[0].Fields.Count);
             Assert.Equal(333, tiffDoc.Directories[0][TiffTag.ImageWidth].GetValue<int>());
-            Assert.Equal(225, tiffDoc.Directories[0][TiffTag.ImageHeight].GetValue<int>());
+            Assert.Equal(225, tiffDoc.Directories[0][TiffTag.ImageLength].GetValue<int>());
             Assert.Equal(new[] { 16, 16, 16 }, tiffDoc.Directories[0][TiffTag.BitsPerSample].GetValues<int>());
             Assert.Equal((ushort)34676, tiffDoc.Directories[0][TiffTag.Compression].GetValue<ushort>());
             Assert.Equal(32845, tiffDoc.Directories[0][TiffTag.PhotometricInterpretation].GetValue<int>());
@@ -506,9 +506,9 @@ namespace TiffDocumentTest
         private static void FieldCheckOxford(TiffDocument tiffDoc)
         {
             Assert.Equal(1, tiffDoc.PageCount);
-            Assert.Equal(10, tiffDoc.Directories[0].Tags.Count);
+            Assert.Equal(10, tiffDoc.Directories[0].Fields.Count);
             Assert.Equal(601, tiffDoc.Directories[0][TiffTag.ImageWidth].GetValue<int>());
-            Assert.Equal(81, tiffDoc.Directories[0][TiffTag.ImageHeight].GetValue<int>());
+            Assert.Equal(81, tiffDoc.Directories[0][TiffTag.ImageLength].GetValue<int>());
             Assert.Equal(new[] { 8, 8, 8 }, tiffDoc.Directories[0][TiffTag.BitsPerSample].GetValues<int>());
             Assert.Equal(CompressionType.LZW, tiffDoc.Directories[0].CompressionType);
             Assert.Equal(2, tiffDoc.Directories[0][TiffTag.PhotometricInterpretation].GetValue<int>());
@@ -522,9 +522,9 @@ namespace TiffDocumentTest
         private static void FieldCheckQuadJpeg(TiffDocument tiffDoc)
         {
             Assert.Equal(1, tiffDoc.PageCount);
-            Assert.Equal(14, tiffDoc.Directories[0].Tags.Count);
+            Assert.Equal(14, tiffDoc.Directories[0].Fields.Count);
             Assert.Equal(512, tiffDoc.Directories[0][TiffTag.ImageWidth].GetValue<int>());
-            Assert.Equal(384, tiffDoc.Directories[0][TiffTag.ImageHeight].GetValue<int>());
+            Assert.Equal(384, tiffDoc.Directories[0][TiffTag.ImageLength].GetValue<int>());
             Assert.Equal(new[] { 8, 8, 8 }, tiffDoc.Directories[0][TiffTag.BitsPerSample].GetValues<int>());
             Assert.Equal(CompressionType.JPEG, tiffDoc.Directories[0].CompressionType);
             Assert.Equal(6, tiffDoc.Directories[0][TiffTag.PhotometricInterpretation].GetValue<int>());
@@ -542,9 +542,9 @@ namespace TiffDocumentTest
         private static void FieldCheckQuadLzw(TiffDocument tiffDoc)
         {
             Assert.Equal(1, tiffDoc.PageCount);
-            Assert.Equal(13, tiffDoc.Directories[0].Tags.Count);
+            Assert.Equal(13, tiffDoc.Directories[0].Fields.Count);
             Assert.Equal(512, tiffDoc.Directories[0][TiffTag.ImageWidth].GetValue<int>());
-            Assert.Equal(384, tiffDoc.Directories[0][TiffTag.ImageHeight].GetValue<int>());
+            Assert.Equal(384, tiffDoc.Directories[0][TiffTag.ImageLength].GetValue<int>());
             Assert.Equal(new[] { 8, 8, 8 }, tiffDoc.Directories[0][TiffTag.BitsPerSample].GetValues<int>());
             Assert.Equal(CompressionType.LZW, tiffDoc.Directories[0].CompressionType);
             Assert.Equal(2, tiffDoc.Directories[0][TiffTag.PhotometricInterpretation].GetValue<int>());
@@ -561,9 +561,9 @@ namespace TiffDocumentTest
         private static void FieldCheckQuadTile(TiffDocument tiffDoc)
         {
             Assert.Equal(1, tiffDoc.PageCount);
-            Assert.Equal(18, tiffDoc.Directories[0].Tags.Count);
+            Assert.Equal(18, tiffDoc.Directories[0].Fields.Count);
             Assert.Equal(512, tiffDoc.Directories[0][TiffTag.ImageWidth].GetValue<int>());
-            Assert.Equal(384, tiffDoc.Directories[0][TiffTag.ImageHeight].GetValue<int>());
+            Assert.Equal(384, tiffDoc.Directories[0][TiffTag.ImageLength].GetValue<int>());
             Assert.Equal(new[] { 8, 8, 8 }, tiffDoc.Directories[0][TiffTag.BitsPerSample].GetValues<int>());
             Assert.Equal(CompressionType.LZW, tiffDoc.Directories[0].CompressionType);
             Assert.Equal(2, tiffDoc.Directories[0][TiffTag.PhotometricInterpretation].GetValue<int>());
@@ -585,14 +585,14 @@ namespace TiffDocumentTest
         private static void FieldCheckSmallliz(TiffDocument tiffDoc)
         {
             Assert.Equal(1, tiffDoc.PageCount);
-            Assert.Equal(26, tiffDoc.Directories[0].Tags.Count);
+            Assert.Equal(26, tiffDoc.Directories[0].Fields.Count);
             Assert.Equal(0, tiffDoc.Directories[0][TiffTag.NewSubfileType].GetValue<int>());
             Assert.Equal(160, tiffDoc.Directories[0][TiffTag.ImageWidth].GetValue<int>());
-            Assert.Equal(160, tiffDoc.Directories[0][TiffTag.ImageHeight].GetValue<int>());
+            Assert.Equal(160, tiffDoc.Directories[0][TiffTag.ImageLength].GetValue<int>());
             Assert.Equal(new[] { 8, 8, 8 }, tiffDoc.Directories[0][TiffTag.BitsPerSample].GetValues<int>());
             Assert.Equal(CompressionType.OJPEG, tiffDoc.Directories[0].CompressionType);
             Assert.Equal(6, tiffDoc.Directories[0][TiffTag.PhotometricInterpretation].GetValue<int>());
-            Assert.Equal(610, tiffDoc.Directories[0][TiffTag.StripOffsets].GetValue<int>());
+            Assert.Equal(1, tiffDoc.Directories[0][TiffTag.StripOffsets].Count);
             Assert.Equal(3, tiffDoc.Directories[0][TiffTag.SamplesPerPixel].GetValue<int>());
             Assert.Equal(160, tiffDoc.Directories[0][TiffTag.RowsPerStrip].GetValue<int>());
             Assert.Equal(3447, tiffDoc.Directories[0][TiffTag.StripByteCounts].GetValue<int>());
@@ -617,9 +617,9 @@ namespace TiffDocumentTest
         private static void FieldCheckStrike(TiffDocument tiffDoc)
         {
             Assert.Equal(1, tiffDoc.PageCount);
-            Assert.Equal(16, tiffDoc.Directories[0].Tags.Count);
+            Assert.Equal(16, tiffDoc.Directories[0].Fields.Count);
             Assert.Equal(256, tiffDoc.Directories[0][TiffTag.ImageWidth].GetValue<int>());
-            Assert.Equal(200, tiffDoc.Directories[0][TiffTag.ImageHeight].GetValue<int>());
+            Assert.Equal(200, tiffDoc.Directories[0][TiffTag.ImageLength].GetValue<int>());
             Assert.Equal(new[] { 8, 8, 8, 8 }, tiffDoc.Directories[0][TiffTag.BitsPerSample].GetValues<int>());
             Assert.Equal(CompressionType.LZW, tiffDoc.Directories[0].CompressionType);
             Assert.Equal(2, tiffDoc.Directories[0][TiffTag.PhotometricInterpretation].GetValue<int>());
@@ -641,10 +641,10 @@ namespace TiffDocumentTest
         {
             Assert.Equal(2, tiffDoc.PageCount);
 
-            Assert.Equal(15, tiffDoc.Directories[0].Tags.Count);
+            Assert.Equal(15, tiffDoc.Directories[0].Fields.Count);
             Assert.Equal(1, tiffDoc.Directories[0][TiffTag.SubfileType].GetValue<int>());
             Assert.Equal(1512, tiffDoc.Directories[0][TiffTag.ImageWidth].GetValue<int>());
-            Assert.Equal(359, tiffDoc.Directories[0][TiffTag.ImageHeight].GetValue<int>());
+            Assert.Equal(359, tiffDoc.Directories[0][TiffTag.ImageLength].GetValue<int>());
             Assert.Equal(4, tiffDoc.Directories[0][TiffTag.BitsPerSample].GetValue<int>());
             Assert.Equal(32809, tiffDoc.Directories[0][TiffTag.Compression].GetValue<int>());
             Assert.Equal(0, tiffDoc.Directories[0][TiffTag.PhotometricInterpretation].GetValue<int>());
@@ -658,10 +658,10 @@ namespace TiffDocumentTest
             Assert.Equal(296.64d, tiffDoc.Directories[0][TiffTag.YResolution].GetValue<double>());
             Assert.Equal(1, tiffDoc.Directories[0][TiffTag.PlanarConfiguration].GetValue<int>());
 
-            Assert.Equal(15, tiffDoc.Directories[1].Tags.Count);
+            Assert.Equal(15, tiffDoc.Directories[1].Fields.Count);
             Assert.Equal(1, tiffDoc.Directories[1][TiffTag.SubfileType].GetValue<int>());
             Assert.Equal(1512, tiffDoc.Directories[1][TiffTag.ImageWidth].GetValue<int>());
-            Assert.Equal(359, tiffDoc.Directories[1][TiffTag.ImageHeight].GetValue<int>());
+            Assert.Equal(359, tiffDoc.Directories[1][TiffTag.ImageLength].GetValue<int>());
             Assert.Equal(1, tiffDoc.Directories[1][TiffTag.BitsPerSample].GetValue<int>());
             Assert.Equal(1, tiffDoc.Directories[1][TiffTag.Compression].GetValue<int>());
             Assert.Equal(0, tiffDoc.Directories[1][TiffTag.PhotometricInterpretation].GetValue<int>());
@@ -679,9 +679,9 @@ namespace TiffDocumentTest
         private static void FieldCheckYcbcrCat(TiffDocument tiffDoc)
         {
             Assert.Equal(1, tiffDoc.PageCount);
-            Assert.Equal(16, tiffDoc.Directories[0].Tags.Count);
+            Assert.Equal(16, tiffDoc.Directories[0].Fields.Count);
             Assert.Equal(250, tiffDoc.Directories[0][TiffTag.ImageWidth].GetValue<int>());
-            Assert.Equal(325, tiffDoc.Directories[0][TiffTag.ImageHeight].GetValue<int>());
+            Assert.Equal(325, tiffDoc.Directories[0][TiffTag.ImageLength].GetValue<int>());
             Assert.Equal(new[] { 8, 8, 8 }, tiffDoc.Directories[0][TiffTag.BitsPerSample].GetValues<int>());
             Assert.Equal(CompressionType.LZW, tiffDoc.Directories[0].CompressionType);
             Assert.Equal(6, tiffDoc.Directories[0][TiffTag.PhotometricInterpretation].GetValue<int>());
@@ -701,9 +701,9 @@ namespace TiffDocumentTest
         private static void FieldCheckZackTheCat(TiffDocument tiffDoc)
         {
             Assert.Equal(1, tiffDoc.PageCount);
-            Assert.Equal(21, tiffDoc.Directories[0].Tags.Count);
+            Assert.Equal(21, tiffDoc.Directories[0].Fields.Count);
             Assert.Equal(234, tiffDoc.Directories[0][TiffTag.ImageWidth].GetValue<int>());
-            Assert.Equal(213, tiffDoc.Directories[0][TiffTag.ImageHeight].GetValue<int>());
+            Assert.Equal(213, tiffDoc.Directories[0][TiffTag.ImageLength].GetValue<int>());
             Assert.Equal(new[] { 8, 8, 8 }, tiffDoc.Directories[0][TiffTag.BitsPerSample].GetValues<int>());
             Assert.Equal(CompressionType.OJPEG, tiffDoc.Directories[0].CompressionType);
             Assert.Equal(6, tiffDoc.Directories[0][TiffTag.PhotometricInterpretation].GetValue<int>());

@@ -2,22 +2,20 @@
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using Ephemera.Tiff.Infrastructure;
 
-namespace Ephemera.Tiff
+namespace Ephemera.Tiff.Fields
 {
     [DebuggerDisplay("{Tag} ({Type})")]
     internal class FixedSizeTableTiffField : LongTiffField, ITiffFieldInternal
     {
         private readonly List<byte[]> tables = new List<byte[]>();
 
-        public FixedSizeTableTiffField(ushort tag, TiffReader reader) : base(tag, reader)
-        {
-
-        }
+        public FixedSizeTableTiffField(ushort tag, TiffReader reader) : base(tag, reader) { }
 
         private FixedSizeTableTiffField(FixedSizeTableTiffField original) : base(original.TagNum, 0)
         {
-            ((ITiffFieldInternal)this).Offset = ((ITiffFieldInternal)original).Offset;
+            Offset = original.Offset;
             Values = new List<uint>(original.Values);
             tables.AddRange(original.tables.Select(x => x.ToArray()));
         }
@@ -36,15 +34,16 @@ namespace Ephemera.Tiff
             reader.BaseStream.Seek(pos, SeekOrigin.Begin);
         }
 
-        public override void WriteData(Stream s)
+        public override void WriteData(BinaryWriter writer)
         {
-            base.WriteData(s);
-
             for (int i = 0; i < tables.Count; ++i)
             {
-                Values[i] = (uint) s.Position;
-                s.Write(tables[i], 0, tables[i].Length);
+                writer.AlignToWordBoundary();
+                Values[i] = (uint) writer.BaseStream.Position;
+                writer.Write(tables[i]);
             }
+
+            base.WriteData(writer);
         }
 
         ITiffFieldInternal ITiffFieldInternal.Clone()

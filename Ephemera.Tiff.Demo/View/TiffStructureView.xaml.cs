@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using Ephemera.Tiff.Demo.ViewModel;
 
 namespace Ephemera.Tiff.Demo.View
 {
@@ -10,6 +11,7 @@ namespace Ephemera.Tiff.Demo.View
         public TiffStructureView()
         {
             InitializeComponent();
+            DataContext = new TiffStructureViewModel(new DialogService());
         }
     }
 }

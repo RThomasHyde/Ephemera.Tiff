@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using Ephemera.Tiff.Infrastructure;
 
-namespace Ephemera.Tiff
+namespace Ephemera.Tiff.Fields
 {
     internal class SubIfdTiffField : LongTiffField, ITiffFieldInternal
     {
@@ -20,7 +21,7 @@ namespace Ephemera.Tiff
         private SubIfdTiffField(SubIfdTiffField original) : base(original.TagNum, 0)
         {
             TypeNum = (ushort)TiffFieldType.IFD;
-            ((ITiffFieldInternal)this).Offset = ((ITiffFieldInternal)original).Offset;
+            Offset = original.Offset;
             Values = new List<uint>(original.Values);
             foreach (var subIfd in original.subIfds)
                 subIfds.Add(subIfd.Key, new TiffDirectory(subIfd.Value));
@@ -49,13 +50,13 @@ namespace Ephemera.Tiff
             reader.BaseStream.Seek(pos, SeekOrigin.Begin);
         }
 
-        public override void WriteData(Stream s)
+        public override void WriteData(BinaryWriter writer)
         {
-            base.WriteData(s);
+            base.WriteData(writer);
 
             for (int i = 0; i < Count; ++i)
             {
-                DirectoryBlock block = subIfds[i].Write(s);
+                DirectoryBlock block = subIfds[i].Write(writer);
                 Values[i] = (uint)block.IFDPosition;
             }
         }

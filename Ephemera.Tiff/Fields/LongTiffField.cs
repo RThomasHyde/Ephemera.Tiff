@@ -1,16 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using Ephemera.Tiff.Infrastructure;
 
-namespace Ephemera.Tiff
+namespace Ephemera.Tiff.Fields
 {
     [DebuggerDisplay("{Tag} ({Type})")]
     internal class LongTiffField : TiffFieldBase<uint>,  ITiffFieldInternal
     {
-        public virtual uint Offset { get; set; }
-
         internal LongTiffField(ushort tag, TiffReader reader = null)
         {
             TagNum = tag;
@@ -30,7 +28,7 @@ namespace Ephemera.Tiff
         {
             TagNum = original.TagNum;
             TypeNum = original.TypeNum;
-            ((ITiffFieldInternal)this).Offset = ((ITiffFieldInternal)original).Offset;
+            Offset = original.Offset;
             Values = new List<uint>(original.Values);
         }
 
@@ -38,36 +36,20 @@ namespace Ephemera.Tiff
         {
             uint count = reader.ReadUInt32();
             var offset = reader.ReadUInt32();
-            ((ITiffFieldInternal) this).Offset = offset;
-            if (count > 1)
-                Values = reader.ReadNUInt32(offset, count).ToList();
-            else
-            {
-                Values = new List<uint> {offset};
-            }
+            Offset = offset;
+            Values = count > 1 ? reader.ReadNUInt32(offset, count).ToList() : new List<uint> {offset};
         }
 
-        public virtual void WriteTag(Stream s)
+        protected override void WriteOffset(BinaryWriter writer)
         {
-            var bytes = BitConverter.GetBytes(TagNum);
-            s.Write(bytes, 0, 2);
-
-            bytes = BitConverter.GetBytes(TypeNum);
-            s.Write(bytes, 0, 2);
-
-            bytes = BitConverter.GetBytes(Count);
-            s.Write(bytes, 0, 4);
-
-            bytes = BitConverter.GetBytes(Count == 1 ? Values[0] : ((ITiffFieldInternal)this).Offset);
-            s.Write(bytes, 0, 4);
+            writer.Write(Count == 1 ? Values[0] : Offset);
         }
 
-        public virtual void WriteData(Stream s)
+        public virtual void WriteData(BinaryWriter writer)
         {
             if (Count == 1) return;
-            ((ITiffFieldInternal)this).Offset = (uint)s.Position;
-            foreach (var value in Values)
-                s.Write(BitConverter.GetBytes(value), 0, 4);
+            Offset = (uint)writer.BaseStream.Position;
+            Values.ForEach(writer.Write);
         }
 
         ITiffFieldInternal ITiffFieldInternal.Clone()

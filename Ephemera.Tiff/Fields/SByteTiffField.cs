@@ -1,16 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using Ephemera.Tiff.Infrastructure;
 
-namespace Ephemera.Tiff
+namespace Ephemera.Tiff.Fields
 {
     [DebuggerDisplay("{Tag} ({Type})")]
     internal sealed class SByteTiffField : TiffFieldBase<sbyte>, ITiffFieldInternal
     {
-        uint ITiffFieldInternal.Offset { get; set; }
-
         internal SByteTiffField(ushort tag, TiffReader reader = null)
         {
             TagNum = tag;
@@ -22,7 +20,7 @@ namespace Ephemera.Tiff
         {
             TagNum = original.TagNum;
             TypeNum = original.TypeNum;
-            ((ITiffFieldInternal)this).Offset = ((ITiffFieldInternal)original).Offset;
+            Offset = original.Offset;
             Values = new List<sbyte>(original.Values);
         }
 
@@ -46,41 +44,29 @@ namespace Ephemera.Tiff
             }
         }
 
-        void ITiffFieldInternal.WriteTag(Stream s)
+        protected override void WriteOffset(BinaryWriter writer)
         {
-            var bytes = BitConverter.GetBytes(TagNum);
-            s.Write(bytes, 0, 2);
-
-            bytes = BitConverter.GetBytes(TypeNum);
-            s.Write(bytes, 0, 2);
-
-            bytes = BitConverter.GetBytes(Count);
-            s.Write(bytes, 0, 4);
-
-            sbyte[] sbytes = new sbyte[4];
             if (Count <= 4)
             {
-                sbytes = new sbyte[4];
+                var sbytes = new sbyte[4];
                 for (int i = 0; i < Count; ++i)
                     sbytes[i] = Values[i];
+                // The CLR apparently supports this cast despite the warning
+                var bytes = (byte[])(object)sbytes;
+                writer.Write(bytes, 0, 4);
             }
             else
             {
-                for (int i = 0; i < Count; ++i)
-                    sbytes[i] = Values[i];
+                writer.Write(Offset);
             }
-
-            // The CLR apparently supports this cast despite the warning
-            bytes = (byte[])(object)sbytes; 
-            s.Write(bytes, 0, 4);
         }
 
-        void ITiffFieldInternal.WriteData(Stream s)
+        void ITiffFieldInternal.WriteData(BinaryWriter writer)
         {
             if (Count <= 4) return;
-            ((ITiffFieldInternal)this).Offset = (uint)s.Position;
+            ((ITiffFieldInternal)this).Offset = (uint)writer.BaseStream.Position;
             var bytes = (byte[]) (object) Values.ToArray();
-            s.Write(bytes, 0, Count);
+            writer.Write(bytes);
         }
 
         ITiffFieldInternal ITiffFieldInternal.Clone()

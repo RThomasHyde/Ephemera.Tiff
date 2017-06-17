@@ -1,15 +1,39 @@
 ﻿using System;
 using System.IO;
 
-namespace Ephemera.Tiff
+namespace Ephemera.Tiff.Infrastructure
 {
     internal sealed class TiffReader : BinaryReader
     {
-        private readonly bool sameEndian;
+        private bool sameEndian;
 
-        public TiffReader(Stream input, ByteOrder order) : base(input)
+        public TiffReader(Stream input) : base(input)
         {
-            sameEndian = BitConverter.IsLittleEndian && order == ByteOrder.LittleEndian;
+            ReadHeader();
+        }
+
+        private void ReadHeader()
+        {
+            var byteOrderMark = base.ReadInt16();
+            switch (byteOrderMark)
+            {
+                case TiffConstants.BOM_LSB2_MSB:
+                    sameEndian = BitConverter.IsLittleEndian;
+                    break;
+                case TiffConstants.BOM_MSB2_LSB:
+                    sameEndian = !BitConverter.IsLittleEndian;
+                    break;
+                default:
+                    throw new TiffException("Invalid byte order mark (BOM) for a TIFF image.");
+            }
+
+            if (ReadInt16() != TiffConstants.MAGIC)
+                throw new TiffException("TIFF magic not found in file header.");
+        }
+
+        public long Seek(long offset, SeekOrigin origin)
+        {
+            return BaseStream.Seek(offset, origin);
         }
 
         public override float ReadSingle()

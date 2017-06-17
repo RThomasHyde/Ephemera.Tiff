@@ -4,18 +4,22 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Ephemera.Tiff.Infrastructure;
 
-namespace Ephemera.Tiff
+namespace Ephemera.Tiff.Fields
 {
     [DebuggerDisplay("{Tag} ({Type})")]
     internal sealed class AsciiTiffField : TiffFieldBase<string>, ITiffFieldInternal
     {
-        uint ITiffFieldInternal.Offset { get; set; }
+        public override int Count
+        {
+            get { return Values.Sum(x => Encoding.ASCII.GetByteCount(x) + 1); }
+        }
 
         internal AsciiTiffField(ushort tag, TiffReader reader = null)
         {
             TagNum = tag;
-            TypeNum = (ushort) TiffFieldType.ASCII;
+            TypeNum = (ushort)TiffFieldType.ASCII;
             if (reader != null) ReadTag(reader);
         }
 
@@ -23,7 +27,7 @@ namespace Ephemera.Tiff
         {
             TagNum = original.TagNum;
             TypeNum = original.TypeNum;
-            ((ITiffFieldInternal) this).Offset = ((ITiffFieldInternal) original).Offset;
+            Offset = original.Offset;
             Values = new List<string>(original.Values);
         }
 
@@ -31,7 +35,7 @@ namespace Ephemera.Tiff
         {
             var nBytes = reader.ReadUInt32();
             uint offset = reader.ReadUInt32();
-            ((ITiffFieldInternal) this).Offset = offset;
+            ((ITiffFieldInternal)this).Offset = offset;
             var bytes = nBytes > 4 ? reader.ReadNBytes(offset, nBytes) : BitConverter.GetBytes(offset);
             Values = ReadStrings(bytes);
         }
@@ -52,12 +56,9 @@ namespace Ephemera.Tiff
             return strings;
         }
 
-        void ITiffFieldInternal.WriteTag(Stream s)
+        void ITiffFieldInternal.WriteEntry(BinaryWriter writer)
         {
-            var writer = new BinaryWriter(s);
-
             writer.Write(TagNum);
-
             writer.Write(TypeNum);
 
             var stringBytes = new List<byte[]>();
@@ -66,7 +67,7 @@ namespace Ephemera.Tiff
                 stringBytes.Add(Encoding.ASCII.GetBytes(@string));
             }
 
-            uint count = (uint) stringBytes.Sum(x => x.Length + 1);
+            uint count = (uint)stringBytes.Sum(x => x.Length + 1);
             writer.Write(count);
 
             // if the value fits into 4 bytes, write it directly to the 
@@ -74,20 +75,24 @@ namespace Ephemera.Tiff
             // values were stored.
             if (count <= 4)
             {
-                foreach (var array in stringBytes)
-                {
-                    foreach (var @byte in array)
-                        s.WriteByte(@byte);
-                    s.WriteByte(0);
-                }
+                stringBytes.ForEach(a =>
+                                    {
+                                        writer.Write(a);
+                                        writer.Write((byte)0);
+                                    });
             }
             else
             {
-                writer.Write(((ITiffFieldInternal)this).Offset);
+                writer.Write(Offset);
             }
         }
 
-        void ITiffFieldInternal.WriteData(Stream s)
+        protected override void WriteOffset(BinaryWriter writer)
+        {
+            // no need to do anything in here since we're overriding ITiffFieldInternal.WriteEntry
+        }
+
+        void ITiffFieldInternal.WriteData(BinaryWriter writer)
         {
             var stringBytes = new List<byte[]>();
             foreach (var @string in Values)
@@ -95,29 +100,20 @@ namespace Ephemera.Tiff
                 stringBytes.Add(Encoding.ASCII.GetBytes(@string));
             }
 
-            uint count = (uint)stringBytes.Sum(x => x.Length + 1);
+            var count = stringBytes.Sum(x => x.Length + 1);
 
-            // if the string value(s) fits inside 4 bytes, it will be
-            // stored directly in the tag's offset field, so we shouldn't
-            // write anything here.
+            // if all values fit inside 4 bytes, they will be stored directly in the tag's offset field 
+            // when WriteEntry is called, so we don't need to write anything here.
             if (count <= 4) return;
 
             // update the tag's offset to point to this location in the stream
-            ((ITiffFieldInternal) this).Offset = (uint)s.Position;
+            ((ITiffFieldInternal)this).Offset = (uint)writer.BaseStream.Position;
 
-            foreach (var array in stringBytes)
-            {
-                foreach (var @byte in array)
-                {
-                    s.WriteByte(@byte);
-                }
-                s.WriteByte(0);
-            }
-        }
-
-        public override bool DataExceeds4Bytes
-        {
-            get { return Values.Sum(x => x.Length + 1) > 4; }
+            stringBytes.ForEach(a =>
+                                {
+                                    writer.Write(a);
+                                    writer.Write((byte) 0);
+                                });
         }
 
         ITiffFieldInternal ITiffFieldInternal.Clone()

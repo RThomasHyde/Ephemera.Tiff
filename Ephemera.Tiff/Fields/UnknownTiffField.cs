@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using Ephemera.Tiff.Infrastructure;
 
-namespace Ephemera.Tiff
+namespace Ephemera.Tiff.Fields
 {
     [DebuggerDisplay("{Tag} ({Type})")]
     internal sealed class UnknownTiffField : ITiffFieldInternal
@@ -15,20 +16,18 @@ namespace Ephemera.Tiff
             if (reader != null)
             {
                 Count = (int)reader.ReadUInt32();
-                ((ITiffFieldInternal) this).Offset = reader.ReadUInt32();
+                Offset = reader.ReadUInt32();
             }
         }
 
-        uint ITiffFieldInternal.Offset { get; set; }
+        public uint Offset { get; set; }
 
-        public bool DataExceeds4Bytes => false;
-
-        void ITiffFieldInternal.WriteTag(Stream s)
+        void ITiffFieldInternal.WriteEntry(BinaryWriter writer)
         {
             // ignored.
         }
 
-        void ITiffFieldInternal.WriteData(Stream s)
+        void ITiffFieldInternal.WriteData(BinaryWriter writer)
         {
             // ignored.
         }
@@ -45,14 +44,14 @@ namespace Ephemera.Tiff
         {
             get
             {
-                if (Enum.IsDefined(typeof(TiffTag), TagNum))
+                if (Enum.IsDefined(typeof(TiffTag), (int)TagNum))
                     return (TiffTag) TagNum;
                 return TiffTag.Unknown;
             }
         }
 
         public TiffFieldType Type => TiffFieldType.Unknown;
-        public int Count { get; private set; }
+        public int Count { get; }
 
         public T GetValue<T>() where T : IComparable, IConvertible, IEquatable<T>
         {
@@ -64,7 +63,17 @@ namespace Ephemera.Tiff
             return new List<T>();
         }
 
+        public void SetValue(object value, int index = 0)
+        {
+            
+        }
+
         public void SetValue<T>(T value, int index = 0) where T : IComparable, IConvertible, IEquatable<T>
+        {
+            
+        }
+
+        public void AddValue(object value)
         {
             
         }

@@ -1,9 +1,13 @@
-﻿namespace Ephemera.Tiff
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace Ephemera.Tiff
 {
     /// <summary>
-    /// Enumeration of TIFF tag data types.
+    /// Enumeration of TIFF field data types.
     /// </summary>
-    public enum TiffFieldType
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
+    [SuppressMessage("ReSharper", "UnusedMember.Global")]
+    public enum TiffFieldType : ushort
     {
         Unknown = 0,
         Byte = 1,

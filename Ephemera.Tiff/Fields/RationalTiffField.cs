@@ -2,14 +2,13 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using Ephemera.Tiff.Infrastructure;
 
-namespace Ephemera.Tiff
+namespace Ephemera.Tiff.Fields
 {
     [DebuggerDisplay("{Tag} ({Type})")]
     internal sealed class RationalTiffField : TiffFieldBase<double>, ITiffFieldInternal
     {
-        uint ITiffFieldInternal.Offset { get; set; }
-
         internal RationalTiffField(ushort tag, TiffReader reader = null)
         {
             TagNum = tag;
@@ -21,7 +20,7 @@ namespace Ephemera.Tiff
         {
             TagNum = original.TagNum;
             TypeNum = original.TypeNum;
-            ((ITiffFieldInternal)this).Offset = ((ITiffFieldInternal)original).Offset;
+            Offset = original.Offset;
             Values = new List<double>(original.Values);
         }
 
@@ -45,30 +44,20 @@ namespace Ephemera.Tiff
             }
         }
 
-        void ITiffFieldInternal.WriteTag(Stream s)
+        protected override void WriteOffset(BinaryWriter writer)
         {
-            var bytes = BitConverter.GetBytes(TagNum);
-            s.Write(bytes, 0, 2);
-
-            bytes = BitConverter.GetBytes(TypeNum);
-            s.Write(bytes, 0, 2);
-
-            bytes = BitConverter.GetBytes(Count);
-            s.Write(bytes, 0, 4);
-
-            bytes = BitConverter.GetBytes(((ITiffFieldInternal)this).Offset);
-            s.Write(bytes, 0, 4);
+            writer.Write(Offset);
         }
 
-        void ITiffFieldInternal.WriteData(Stream s)
+        void ITiffFieldInternal.WriteData(BinaryWriter writer)
         {
-            ((ITiffFieldInternal)this).Offset = (uint)s.Position;
+            ((ITiffFieldInternal)this).Offset = (uint)writer.BaseStream.Position;
             foreach (var value in Values)
             {
                 int numerator, denominator;
                 ToFraction(value, out numerator, out denominator);
-                s.Write(BitConverter.GetBytes(numerator), 0, 4);
-                s.Write(BitConverter.GetBytes(denominator), 0, 4);
+                writer.Write(numerator);
+                writer.Write(denominator);
             }
         }
 
@@ -76,6 +65,11 @@ namespace Ephemera.Tiff
         {
             return new RationalTiffField(this);
         }
+
+        #region Borrowed From the Internet
+
+        // The following methods were borrowed from code found at https://www.codeproject.com/Articles/9078/Fraction-class-in-C, 
+        // and modified lightly to suit my usage. This is a wheel I chose not to reinvent, as I am not a maths person.
 
         private void ToFraction(double inValue, out int numerator, out int denominator)
         {
@@ -102,13 +96,11 @@ namespace Ephemera.Tiff
 
         private void ConvertPositiveDouble(int sign, double inValue, out int numerator, out int denominator)
         {
-            // Shamelessly stolen from http://homepage.smc.edu/kennedy_john/CONFRAC.PDF
-            // with AccuracyFactor == double.Episilon
             int fractionNumerator = (int)inValue;
             double fractionDenominator = 1;
             double previousDenominator = 0;
             double remainingDigits = inValue;
-            int maxIterations = 594;    // found at http://www.ozgrid.com/forum/archive/index.php/t-22530.html
+            int maxIterations = 594;
 
             while (remainingDigits != Math.Floor(remainingDigits)
                    && Math.Abs(inValue - (fractionNumerator / fractionDenominator)) > double.Epsilon)
@@ -129,5 +121,7 @@ namespace Ephemera.Tiff
             numerator = fractionNumerator * sign;
             denominator = (int)fractionDenominator;
         }
+
+        #endregion
     }
 }

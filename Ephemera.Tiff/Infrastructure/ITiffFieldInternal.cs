@@ -1,13 +1,12 @@
 ﻿using System.IO;
 
-namespace Ephemera.Tiff
+namespace Ephemera.Tiff.Infrastructure
 {
     internal interface ITiffFieldInternal : ITiffField
     {
-        uint Offset { get; set; }
-        bool DataExceeds4Bytes { get; }
-        void WriteTag(Stream s);
-        void WriteData(Stream s);
+        uint Offset { set; }
+        void WriteEntry(BinaryWriter writer);
+        void WriteData(BinaryWriter writer);
         ITiffFieldInternal Clone();
     }
 }

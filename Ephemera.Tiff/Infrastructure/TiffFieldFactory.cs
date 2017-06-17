@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using Ephemera.Tiff.Fields;
 
-namespace Ephemera.Tiff
+namespace Ephemera.Tiff.Infrastructure
 {
     internal static class TiffFieldFactory
     {

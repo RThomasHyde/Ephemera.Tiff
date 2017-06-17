@@ -20,6 +20,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Debug\Ephemera.Tiff.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -43,6 +44,7 @@
     <Compile Include="CompressionType.cs" />
     <Compile Include="Infrastructure\DirectoryBlock.cs" />
     <Compile Include="Infrastructure\ByteOrder.cs" />
+    <Compile Include="Infrastructure\StreamUtils.cs" />
     <Compile Include="Infrastructure\TiffReader.cs" />
     <Compile Include="Infrastructure\ITiffFieldInternal.cs" />
     <Compile Include="Fields\AsciiTiffField.cs" />

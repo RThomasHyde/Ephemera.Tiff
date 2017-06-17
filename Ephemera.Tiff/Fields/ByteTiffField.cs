@@ -3,14 +3,13 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using Ephemera.Tiff.Infrastructure;
 
-namespace Ephemera.Tiff
+namespace Ephemera.Tiff.Fields
 {
     [DebuggerDisplay("{Tag} ({Type})")]
     internal sealed class ByteTiffField : TiffFieldBase<byte>, ITiffFieldInternal
     {
-        uint ITiffFieldInternal.Offset { get; set; }
-
         internal ByteTiffField(ushort tag, TiffReader reader = null)
         {
             TagNum = tag;
@@ -22,7 +21,7 @@ namespace Ephemera.Tiff
         {
             TagNum = original.TagNum;
             TypeNum = original.TypeNum;
-            ((ITiffFieldInternal)this).Offset = ((ITiffFieldInternal)original).Offset;
+            ((ITiffFieldInternal)this).Offset = original.Offset;
             Values = new List<byte>(original.Values);
         }
 
@@ -42,35 +41,24 @@ namespace Ephemera.Tiff
             }
         }
 
-        void ITiffFieldInternal.WriteTag(Stream s)
+        protected override void WriteOffset(BinaryWriter writer)
         {
-            var bytes = BitConverter.GetBytes(TagNum);
-            s.Write(bytes, 0, 2);
-
-            bytes = BitConverter.GetBytes(TypeNum);
-            s.Write(bytes, 0, 2);
-
-            bytes = BitConverter.GetBytes(Values.Count);
-            s.Write(bytes, 0, 4);
-
-            if (Values.Count <= 4)
+            if (Count <= 4)
             {
-                bytes = new byte[4];
+                var array = new byte[4];
                 for (int i = 0; i < Count; ++i)
-                    bytes[i] = Values[i];
+                    array[i] = Values[i];
+                writer.Write(array);
             }
             else
-            {
-                bytes = BitConverter.GetBytes(((ITiffFieldInternal)this).Offset);
-            }
-            s.Write(bytes, 0, 4);
+                writer.Write(Offset);
         }
 
-        void ITiffFieldInternal.WriteData(Stream s)
+        void ITiffFieldInternal.WriteData(BinaryWriter writer)
         {
             if (Count <= 4) return;
-            ((ITiffFieldInternal)this).Offset = (uint)s.Position;
-            s.Write(Values.ToArray(), 0, Count);
+            ((ITiffFieldInternal)this).Offset = (uint)writer.BaseStream.Position;
+            writer.Write(Values.ToArray());
         }
 
         ITiffFieldInternal ITiffFieldInternal.Clone()

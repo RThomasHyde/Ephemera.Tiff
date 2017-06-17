@@ -1,17 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using Ephemera.Tiff.Infrastructure;
 
-namespace Ephemera.Tiff
+namespace Ephemera.Tiff.Fields
 {
     [DebuggerDisplay("{Tag} ({Type})")]
     internal sealed class DoubleTiffField : TiffFieldBase<double>, ITiffFieldInternal
     {
-        uint ITiffFieldInternal.Offset { get; set; }
-        
-
         internal DoubleTiffField(ushort tag, TiffReader reader = null)
         {
             TagNum = tag;
@@ -23,7 +20,7 @@ namespace Ephemera.Tiff
         {
             TagNum = original.TagNum;
             TypeNum = original.TypeNum;
-            ((ITiffFieldInternal)this).Offset = ((ITiffFieldInternal)original).Offset;
+            Offset = original.Offset;
             Values = new List<double>(original.Values);
         }
 
@@ -35,26 +32,15 @@ namespace Ephemera.Tiff
             Values = reader.ReadNDoubles(offset, count).ToList();
         }
 
-        void ITiffFieldInternal.WriteTag(Stream s)
+        protected override void WriteOffset(BinaryWriter writer)
         {
-            var bytes = BitConverter.GetBytes(TagNum);
-            s.Write(bytes, 0, 2);
-
-            bytes = BitConverter.GetBytes(TypeNum);
-            s.Write(bytes, 0, 2);
-
-            bytes = BitConverter.GetBytes(Count);
-            s.Write(bytes, 0, 4);
-
-            bytes = BitConverter.GetBytes(((ITiffFieldInternal)this).Offset);
-            s.Write(bytes, 0, 4);
+            writer.Write(Offset);
         }
 
-        void ITiffFieldInternal.WriteData(Stream s)
+        void ITiffFieldInternal.WriteData(BinaryWriter writer)
         {
-            ((ITiffFieldInternal)this).Offset = (uint)s.Position;
-            foreach (var value in Values)
-                s.Write(BitConverter.GetBytes(value), 0, 8);
+            ((ITiffFieldInternal)this).Offset = (uint)writer.BaseStream.Position;
+            Values.ForEach(writer.Write);
         }
 
         ITiffFieldInternal ITiffFieldInternal.Clone()

@@ -15,6 +15,7 @@ namespace Ephemera.Tiff.Demo.ViewModel
         }
 
         public TiffTag Tag => field.Tag;
+        public ushort TagNum => field.TagNum;
 
         public TiffFieldType Type => field.Type;
 

@@ -1,4 +1,4 @@
-﻿namespace Ephemera.Tiff
+﻿namespace Ephemera.Tiff.Infrastructure
 {
     internal enum ByteOrder
     {
