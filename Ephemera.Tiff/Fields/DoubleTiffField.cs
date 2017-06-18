@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using Ephemera.Tiff.Infrastructure;
 
@@ -27,20 +26,19 @@ namespace Ephemera.Tiff.Fields
         private void ReadTag(TiffReader reader)
         {
             uint count = reader.ReadUInt32();
-            var offset = reader.ReadUInt32();
-            ((ITiffFieldInternal) this).Offset = offset;
-            Values = reader.ReadNDoubles(offset, count).ToList();
+            Offset = reader.ReadUInt32();
+            Values = reader.ReadNDoubles(Offset, count).ToList();
         }
 
-        protected override void WriteOffset(BinaryWriter writer)
+        protected override void WriteOffset(TiffWriter writer)
         {
             writer.Write(Offset);
         }
 
-        void ITiffFieldInternal.WriteData(BinaryWriter writer)
+        void ITiffFieldInternal.WriteData(TiffWriter writer)
         {
-            ((ITiffFieldInternal)this).Offset = (uint)writer.BaseStream.Position;
-            Values.ForEach(writer.Write);
+            Offset = (uint)writer.Position;
+            writer.WriteN(Values);
         }
 
         ITiffFieldInternal ITiffFieldInternal.Clone()

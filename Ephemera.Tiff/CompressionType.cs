@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+#pragma warning disable 1591
 
 namespace Ephemera.Tiff
 {
@@ -7,10 +8,10 @@ namespace Ephemera.Tiff
     /// </summary>
     [SuppressMessage("ReSharper", "InconsistentNaming")]
     [SuppressMessage("ReSharper", "UnusedMember.Global")]
-    public enum CompressionType
+    public enum CompressionType : ushort
     {
-        UNKNOWN = 0,
-        NONE = 1,
+        Unknown = 0,
+        None = 1,
         CCITTRLE = 2,
         CCITTFAX3 = 3,
         CCITT_T4 = 3,

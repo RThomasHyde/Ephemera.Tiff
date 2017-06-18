@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using Ephemera.Tiff.Infrastructure;
 
@@ -20,7 +19,7 @@ namespace Ephemera.Tiff.Fields
         {
             TagNum = tag;
             TypeNum = (ushort)TiffFieldType.Long;
-            ((ITiffFieldInternal) this).Offset = value;
+            Offset = value;
             Values = new List<uint> {value};
         }
 
@@ -35,21 +34,20 @@ namespace Ephemera.Tiff.Fields
         protected virtual void ReadTag(TiffReader reader)
         {
             uint count = reader.ReadUInt32();
-            var offset = reader.ReadUInt32();
-            Offset = offset;
-            Values = count > 1 ? reader.ReadNUInt32(offset, count).ToList() : new List<uint> {offset};
+            Offset = reader.ReadUInt32();
+            Values = count > 1 ? reader.ReadNUInt32(Offset, count).ToList() : new List<uint> {Offset};
         }
 
-        protected override void WriteOffset(BinaryWriter writer)
+        protected override void WriteOffset(TiffWriter writer)
         {
             writer.Write(Count == 1 ? Values[0] : Offset);
         }
 
-        public virtual void WriteData(BinaryWriter writer)
+        public virtual void WriteData(TiffWriter writer)
         {
             if (Count == 1) return;
-            Offset = (uint)writer.BaseStream.Position;
-            Values.ForEach(writer.Write);
+            Offset = (uint)writer.Position;
+            writer.WriteN(Values);
         }
 
         ITiffFieldInternal ITiffFieldInternal.Clone()

@@ -23,7 +23,7 @@ namespace Ephemera.Tiff.Fields
         protected override void ReadTag(TiffReader reader)
         {
             base.ReadTag(reader);
-            var pos = reader.BaseStream.Position;
+            var pos = reader.Position;
 
             foreach (var offset in Values)
             {
@@ -36,15 +36,15 @@ namespace Ephemera.Tiff.Fields
                 tables.Add(table);
             }
 
-            reader.BaseStream.Seek(pos, SeekOrigin.Begin);
+            reader.Seek(pos, SeekOrigin.Begin);
         }
 
-        public override void WriteData(BinaryWriter writer)
+        public override void WriteData(TiffWriter writer)
         {
             for (int i = 0; i < tables.Count; ++i)
             {
                 writer.AlignToWordBoundary();
-                Values[i] = (uint) writer.BaseStream.Position;
+                Values[i] = (uint) writer.Position;
                 writer.Write(tables[i]);
             }
 

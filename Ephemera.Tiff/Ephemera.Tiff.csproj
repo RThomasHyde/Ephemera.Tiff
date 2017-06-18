@@ -42,9 +42,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CompressionType.cs" />
+    <Compile Include="FillOrder.cs" />
     <Compile Include="Infrastructure\DirectoryBlock.cs" />
     <Compile Include="Infrastructure\ByteOrder.cs" />
-    <Compile Include="Infrastructure\StreamUtils.cs" />
+    <Compile Include="Infrastructure\EndianTools.cs" />
     <Compile Include="Infrastructure\TiffReader.cs" />
     <Compile Include="Infrastructure\ITiffFieldInternal.cs" />
     <Compile Include="Fields\AsciiTiffField.cs" />
@@ -52,7 +53,6 @@
     <Compile Include="Fields\FloatTiffField.cs" />
     <Compile Include="Fields\SubIfdTiffField.cs" />
     <Compile Include="Fields\TiffFieldBase.cs" />
-    <Compile Include="Fields\UnknownTiffField.cs" />
     <Compile Include="Fields\VariableSizeTableTiffField.cs" />
     <Compile Include="Fields\FixedSizeTableTiffField.cs" />
     <Compile Include="Fields\SLongTiffField.cs" />
@@ -62,8 +62,11 @@
     <Compile Include="Fields\SShortTiffField.cs" />
     <Compile Include="Fields\ShortTiffField.cs" />
     <Compile Include="Fields\ByteTiffField.cs" />
+    <Compile Include="Infrastructure\TiffWriter.cs" />
     <Compile Include="ITiffField.cs" />
     <Compile Include="Infrastructure\TiffConstants.cs" />
+    <Compile Include="PhotometricInterpretation.cs" />
+    <Compile Include="Threshholding.cs" />
     <Compile Include="TiffDirectory.cs" />
     <Compile Include="TiffDocument.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

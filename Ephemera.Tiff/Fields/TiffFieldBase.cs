@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using Ephemera.Tiff.Infrastructure;
 
@@ -97,7 +96,7 @@ namespace Ephemera.Tiff.Fields
 
         public uint Offset { get; set; }
 
-        void ITiffFieldInternal.WriteEntry(BinaryWriter writer)
+        void ITiffFieldInternal.WriteEntry(TiffWriter writer)
         {
             writer.Write(TagNum);
             writer.Write(TypeNum);
@@ -105,9 +104,9 @@ namespace Ephemera.Tiff.Fields
             WriteOffset(writer);
         }
 
-        protected abstract void WriteOffset(BinaryWriter writer);
+        protected abstract void WriteOffset(TiffWriter writer);
 
-        void ITiffFieldInternal.WriteData(BinaryWriter writer)
+        void ITiffFieldInternal.WriteData(TiffWriter writer)
         {
             throw new NotImplementedException();
         }

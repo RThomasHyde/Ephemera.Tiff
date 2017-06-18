@@ -38,11 +38,11 @@ namespace Ephemera.Tiff.Fields
         protected override void ReadTag(TiffReader reader)
         {
             base.ReadTag(reader);
-            var pos = reader.BaseStream.Position;
+            var pos = reader.Position;
 
             for (int i = 0; i < Count; ++i)
             {
-                reader.BaseStream.Seek(Values[i], SeekOrigin.Begin);
+                reader.Seek(Values[i], SeekOrigin.Begin);
                 var directory = new TiffDirectory(reader);
                 subIfds.Add(i, directory);
             }
@@ -50,7 +50,7 @@ namespace Ephemera.Tiff.Fields
             reader.BaseStream.Seek(pos, SeekOrigin.Begin);
         }
 
-        public override void WriteData(BinaryWriter writer)
+        public override void WriteData(TiffWriter writer)
         {
             base.WriteData(writer);
 

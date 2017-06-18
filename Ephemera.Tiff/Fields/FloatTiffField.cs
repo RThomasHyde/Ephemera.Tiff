@@ -27,28 +27,27 @@ namespace Ephemera.Tiff.Fields
         private void ReadTag(TiffReader reader)
         {
             uint count = reader.ReadUInt32();
-            var pos = reader.BaseStream.Position;
-            var offset = reader.ReadUInt32();
-            ((ITiffFieldInternal) this).Offset = offset;
+            var pos = reader.Position;
+            Offset = reader.ReadUInt32();
             if (count > 1)
-                Values = reader.ReadNSingles(offset, count).ToList();
+                Values = reader.ReadNSingles(Offset, count).ToList();
             else
             {
-                reader.BaseStream.Seek(pos, SeekOrigin.Begin);
+                reader.Seek(pos, SeekOrigin.Begin);
                 Values = new List<float> {reader.ReadSingle()};
             }
         }
 
-        protected override void WriteOffset(BinaryWriter writer)
+        protected override void WriteOffset(TiffWriter writer)
         {
             writer.Write(Count == 1 ? Values[0] : Offset);
         }
 
-        public void WriteData(BinaryWriter writer)
+        public void WriteData(TiffWriter writer)
         {
             if (Count == 1) return;
-            ((ITiffFieldInternal)this).Offset = (uint)writer.BaseStream.Position;
-            Values.ForEach(writer.Write);
+            Offset = (uint)writer.Position;
+            writer.WriteN(Values);
         }
 
         ITiffFieldInternal ITiffFieldInternal.Clone()

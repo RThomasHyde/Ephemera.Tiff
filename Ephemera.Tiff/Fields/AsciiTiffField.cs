@@ -34,9 +34,8 @@ namespace Ephemera.Tiff.Fields
         private void ReadTag(TiffReader reader)
         {
             var nBytes = reader.ReadUInt32();
-            uint offset = reader.ReadUInt32();
-            ((ITiffFieldInternal)this).Offset = offset;
-            var bytes = nBytes > 4 ? reader.ReadNBytes(offset, nBytes) : BitConverter.GetBytes(offset);
+            Offset = reader.ReadUInt32();
+            var bytes = nBytes > 4 ? reader.ReadNBytes(Offset, nBytes) : BitConverter.GetBytes(Offset);
             Values = ReadStrings(bytes);
         }
 
@@ -56,7 +55,7 @@ namespace Ephemera.Tiff.Fields
             return strings;
         }
 
-        void ITiffFieldInternal.WriteEntry(BinaryWriter writer)
+        void ITiffFieldInternal.WriteEntry(TiffWriter writer)
         {
             writer.Write(TagNum);
             writer.Write(TypeNum);
@@ -87,12 +86,12 @@ namespace Ephemera.Tiff.Fields
             }
         }
 
-        protected override void WriteOffset(BinaryWriter writer)
+        protected override void WriteOffset(TiffWriter writer)
         {
             // no need to do anything in here since we're overriding ITiffFieldInternal.WriteEntry
         }
 
-        void ITiffFieldInternal.WriteData(BinaryWriter writer)
+        void ITiffFieldInternal.WriteData(TiffWriter writer)
         {
             var stringBytes = new List<byte[]>();
             foreach (var @string in Values)
@@ -107,7 +106,7 @@ namespace Ephemera.Tiff.Fields
             if (count <= 4) return;
 
             // update the tag's offset to point to this location in the stream
-            ((ITiffFieldInternal)this).Offset = (uint)writer.BaseStream.Position;
+            Offset = (uint)writer.Position;
 
             stringBytes.ForEach(a =>
                                 {

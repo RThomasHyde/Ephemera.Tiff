@@ -26,7 +26,7 @@ namespace Ephemera.Tiff.Infrastructure
             if (fieldFuncs.ContainsKey(tagType))
                 return fieldFuncs[tagType](tagNumber, reader);
 
-            return new UnknownTiffField(tagNumber, tagType, reader);
+            return null;
         }
 
         public static ITiffField CreateField(ushort tagNumber, Type type)

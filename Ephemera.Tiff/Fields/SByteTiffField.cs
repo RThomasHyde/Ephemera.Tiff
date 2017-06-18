@@ -27,14 +27,13 @@ namespace Ephemera.Tiff.Fields
         private void ReadTag(TiffReader reader)
         {
             var count = reader.ReadUInt32();
-            var pos = reader.BaseStream.Position;
-            var offset = reader.ReadUInt32();
-            ((ITiffFieldInternal) this).Offset = offset;
+            var pos = reader.Position;
+            Offset = reader.ReadUInt32();
             if (count > 4)
-                Values = reader.ReadNSBytes(offset, count).ToList();
+                Values = reader.ReadNSBytes(Offset, count).ToList();
             else
             {
-                reader.BaseStream.Seek(pos, SeekOrigin.Begin);
+                reader.Seek(pos, SeekOrigin.Begin);
                 for (int i = 0; i < 4; ++i)
                 {
                     sbyte sb = reader.ReadSByte();
@@ -44,7 +43,7 @@ namespace Ephemera.Tiff.Fields
             }
         }
 
-        protected override void WriteOffset(BinaryWriter writer)
+        protected override void WriteOffset(TiffWriter writer)
         {
             if (Count <= 4)
             {
@@ -61,10 +60,10 @@ namespace Ephemera.Tiff.Fields
             }
         }
 
-        void ITiffFieldInternal.WriteData(BinaryWriter writer)
+        void ITiffFieldInternal.WriteData(TiffWriter writer)
         {
             if (Count <= 4) return;
-            ((ITiffFieldInternal)this).Offset = (uint)writer.BaseStream.Position;
+            Offset = (uint)writer.Position;
             var bytes = (byte[]) (object) Values.ToArray();
             writer.Write(bytes);
         }

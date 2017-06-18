@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using Ephemera.Tiff.Infrastructure;
 
@@ -14,8 +15,24 @@ namespace Ephemera.Tiff
     ///     does not provide any means to decode the actual image data, convert any
     ///     image to or from any other format, or alter the compression of the image data.
     /// </remarks>
+    [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
+    [SuppressMessage("ReSharper", "UnusedMember.Global")]
     public class TiffDocument
     {
+        /// <summary>
+        /// Counts the pages.
+        /// </summary>
+        /// <param name="fileName">Name of the file.</param>
+        /// <returns></returns>
+        public static int CountPages(string fileName)
+        {
+            using (var tiffStream = File.OpenRead(fileName))
+            {
+                var reader = new TiffReader(tiffStream);
+                return SeekToZeroIfd(reader);
+            }
+        }
+
         /// <summary>
         ///     Copies an existing <see cref="TiffDocument" /> instance.
         /// </summary>
@@ -23,24 +40,28 @@ namespace Ephemera.Tiff
         public TiffDocument(TiffDocument source)
         {
             foreach (var dir in source.Directories)
-            {
                 Directories.Add(new TiffDirectory(dir));
-            }
         }
 
         /// <summary>
-        ///     Creates a new <see cref="TiffDocument" /> instnace from a file.
+        ///     Creates a new <see cref="TiffDocument" /> instnace from a TIFF file.
         /// </summary>
         /// <param name="fileName">The filename of a TIFF file.</param>
         public TiffDocument(string fileName)
         {
             using (Stream tiffStream = File.OpenRead(fileName))
-            {
-                if (!tiffStream.CanRead || !tiffStream.CanSeek)
-                    throw new TiffException("Stream cannot be read.");
-
                 ReadDocument(tiffStream);
-            }
+        }
+
+        /// <summary>
+        ///     Creates a new <see cref="TiffDocument" /> instnace from the specified page number of a TIFF file.
+        /// </summary>
+        /// <param name="fileName">The filename of a TIFF file.</param>
+        /// <param name="pageNumber">The page number to read (1-based).</param>
+        public TiffDocument(string fileName, int pageNumber)
+        {
+            using (Stream tiffStream = File.OpenRead(fileName))
+                ReadDocument(tiffStream, pageNumber);
         }
 
         /// <summary>
@@ -59,9 +80,7 @@ namespace Ephemera.Tiff
         /// <summary>
         ///     Creates an empty <see cref="TiffDocument" /> instance.
         /// </summary>
-        public TiffDocument()
-        {
-        }
+        public TiffDocument() { }
 
         /// <summary>
         ///     Gets the TIFF document's directories.
@@ -140,10 +159,7 @@ namespace Ephemera.Tiff
         public void Write(string fileName)
         {
             using (var stream = new FileStream(fileName, FileMode.Create))
-            {
                 Write(stream);
-                stream.Close();
-            }
         }
 
         /// <summary>
@@ -154,10 +170,7 @@ namespace Ephemera.Tiff
         public void Write(string fileName, int index)
         {
             using (var stream = new FileStream(fileName, FileMode.Create))
-            {
                 Write(stream, index);
-                stream.Close();
-            }
         }
 
         /// <summary>
@@ -174,14 +187,9 @@ namespace Ephemera.Tiff
 
             try
             {
-                var writer = new BinaryWriter(stream);
-
-                // write the header
-                writer.Write(TiffConstants.BOM_LSB2_MSB);
-                writer.Write(TiffConstants.MAGIC);
-
-                // write the directories
-                WriteDirectories(writer);
+                var writer = new TiffWriter(stream);
+                writer.WriteHeader();
+                Directories.ForEach(dir => WriteDirectory(writer, dir));
                 writer.Flush();
             }
             catch (Exception e)
@@ -206,18 +214,21 @@ namespace Ephemera.Tiff
 
             try
             {
-                var writer = new BinaryWriter(stream);
+                var writer = new TiffWriter(stream);
                 {
-                    //write the header
-                    writer.Write(TiffConstants.BOM_LSB2_MSB);
-                    writer.Write(TiffConstants.MAGIC);
+                    writer.WriteHeader();
 
-                    //write the directory
+                    // store the position of the directory offset
+                    var ifdPointer = writer.Position;
+
+                    // write the directory
                     var block = Directories[index - 1].Write(writer);
-                    writer.BaseStream.Seek(block.IFDPointerPosition, SeekOrigin.Begin);
+
+                    // go back and update the pointer to the directory
+                    writer.Seek(ifdPointer, SeekOrigin.Begin);
                     writer.Write(block.IFDPosition);
-                    writer.Flush();
-                    writer.BaseStream.Seek(block.NextIFDPosition, SeekOrigin.Begin);
+
+                    writer.Seek(block.NextIFDPosition, SeekOrigin.Begin);
                 }
             }
             catch (Exception e)
@@ -237,10 +248,7 @@ namespace Ephemera.Tiff
         public void WriteAppend(string filename)
         {
             using (var fs = new FileStream(filename, FileMode.OpenOrCreate))
-            {
                 WriteAppend(fs);
-                fs.Close();
-            }
         }
 
         /// <summary>
@@ -254,10 +262,7 @@ namespace Ephemera.Tiff
         public void WriteAppend(string filename, int index)
         {
             using (var fs = new FileStream(filename, FileMode.OpenOrCreate))
-            {
                 WriteAppend(fs, index);
-                fs.Close();
-            }
         }
 
         /// <summary>
@@ -279,26 +284,23 @@ namespace Ephemera.Tiff
 
             try
             {
-                BinaryWriter writer;
+                TiffWriter writer;
 
                 if (stream.Length == 0)
                 {
-                    // write header
-                    writer = new BinaryWriter(stream);
-                    writer.Write(TiffConstants.BOM_LSB2_MSB);
-                    writer.Write(TiffConstants.MAGIC);
+                    writer = new TiffWriter(stream);
+                    writer.WriteHeader();
                 }
                 else
                 {
-                    // seek to the "end" of the TIFF, which is the first IFD pointer with a value of zero
-                    var reader = new TiffReader(stream); //also validates the TIFF header
+                    // seek to the "end" of the TIFF (the first IFD pointer with a value of zero)
+                    var reader = new TiffReader(stream);
                     SeekToZeroIfd(reader);
 
-                    writer = new BinaryWriter(stream);
+                    writer = new TiffWriter(stream, reader.ByteOrder);
                 }
 
-                // write the directories
-                WriteDirectories(writer);
+                Directories.ForEach(dir => WriteDirectory(writer, dir));
                 writer.Flush();
             }
             catch (Exception e)
@@ -346,15 +348,22 @@ namespace Ephemera.Tiff
             }
         }
 
-        private void ReadDocument(Stream stream)
+        private void ReadDocument(Stream stream, int pageNumber = 0)
         {
             var reader = new TiffReader(stream);
             var ifd = reader.ReadUInt32();
 
             try
             {
+                int page = 0;
                 while (ifd != 0)
                 {
+                    page++;
+                    if (pageNumber > 0 && page != pageNumber)
+                    {
+                        ifd = SkipIfd(reader, ifd);
+                        continue;
+                    }
                     reader.Seek(ifd, SeekOrigin.Begin);
                     var directory = new TiffDirectory(reader);
                     Directories.Add(directory);
@@ -367,36 +376,49 @@ namespace Ephemera.Tiff
             }
         }
 
-        private void SeekToZeroIfd(TiffReader reader)
+        private static int SeekToZeroIfd(TiffReader reader)
         {
+            int count = 0;
             var ifd = reader.ReadUInt32();
             while (ifd != 0)
             {
-                reader.Seek(ifd, SeekOrigin.Begin);
-                var numTags = reader.ReadInt16();
-                reader.Seek(numTags * TiffConstants.TIFF_TAG_SIZE, SeekOrigin.Current);
-                ifd = reader.ReadUInt32();
+                count++;
+                ifd = SkipIfd(reader, ifd);
             }
             reader.Seek(-sizeof(uint), SeekOrigin.Current);
+            return count;
         }
 
-        private void WriteDirectories(BinaryWriter writer)
+        private static uint SkipIfd(TiffReader reader, uint ifd)
         {
-            foreach (var directory in Directories)
-            {
-                // write the directory
-                var directoryBlock = directory.Write(writer);
+            reader.Seek(ifd, SeekOrigin.Begin);
+            var numTags = reader.ReadInt16();
+            reader.Seek(numTags * TiffConstants.TIFF_TAG_SIZE, SeekOrigin.Current);
+            return reader.ReadUInt32();
+        }
 
-                // write zero as next IFD offset
-                writer.Write(0);
+        private static void WriteDirectory(TiffWriter writer, TiffDirectory directory)
+        {
+            // store the position of the offset to the directory we're about to write
+            var ifdPointerPos = writer.BaseStream.Position;
 
-                // seek back to the 'next IFD' marker and write the position of the directory
-                writer.BaseStream.Seek(directoryBlock.IFDPointerPosition, SeekOrigin.Begin);
-                writer.Write((uint) directoryBlock.IFDPosition);
+            // write zero as a temporary offset marker for this directory
+            writer.Write(0);
 
-                // return to the start of the next directory
-                writer.BaseStream.Seek(directoryBlock.NextIFDPosition, SeekOrigin.Begin);
-            }
+            // seek to the end of the stream and write the directory
+            writer.BaseStream.Seek(0, SeekOrigin.End);
+            var directoryBlock = directory.Write(writer);
+
+            // write zero as next IFD offset
+            writer.BaseStream.Seek(directoryBlock.NextIFDPosition, SeekOrigin.Begin);
+            writer.Write(0);
+
+            // seek back to the 'next IFD' offset marker and write the position of the directory
+            writer.BaseStream.Seek(ifdPointerPos, SeekOrigin.Begin);
+            writer.Write((uint) directoryBlock.IFDPosition);
+
+            // return to the start of the next directory
+            writer.BaseStream.Seek(directoryBlock.NextIFDPosition, SeekOrigin.Begin);
         }
     }
 }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using Ephemera.Tiff.Infrastructure;
 
 namespace Ephemera.Tiff.Fields
@@ -28,7 +27,7 @@ namespace Ephemera.Tiff.Fields
         {
             uint count = reader.ReadUInt32();
             var offset = reader.ReadUInt32();
-            ((ITiffFieldInternal) this).Offset = offset;
+            Offset = offset;
 
             Values = new List<double>();
 
@@ -44,14 +43,14 @@ namespace Ephemera.Tiff.Fields
             }
         }
 
-        protected override void WriteOffset(BinaryWriter writer)
+        protected override void WriteOffset(TiffWriter writer)
         {
             writer.Write(Offset);
         }
 
-        void ITiffFieldInternal.WriteData(BinaryWriter writer)
+        void ITiffFieldInternal.WriteData(TiffWriter writer)
         {
-            ((ITiffFieldInternal)this).Offset = (uint)writer.BaseStream.Position;
+            Offset = (uint)writer.Position;
             foreach (var value in Values)
             {
                 int numerator, denominator;

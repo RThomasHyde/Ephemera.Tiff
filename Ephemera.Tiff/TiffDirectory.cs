@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using Ephemera.Tiff.Fields;
@@ -10,6 +11,7 @@ namespace Ephemera.Tiff
     /// <summary>
     ///     Represents a TIFF image file directory (IFD), which is essentially a page within a TIFF document.
     /// </summary>
+    [SuppressMessage("ReSharper", "UnusedMember.Global")]
     public class TiffDirectory
     {
         private readonly SortedDictionary<ushort, ITiffField> fields = new SortedDictionary<ushort, ITiffField>();
@@ -59,7 +61,7 @@ namespace Ephemera.Tiff
         public ITiffField this[TiffTag tag] => HasTag(tag) ? Fields[(ushort) tag] : null;
 
         /// <summary>
-        ///     Gets the horizontal DPI of the image.
+        ///     Gets the value of the XResolution field.
         /// </summary>
         public double DpiX
         {
@@ -71,7 +73,7 @@ namespace Ephemera.Tiff
         }
 
         /// <summary>
-        ///     Gets the vertical DPI of the image.
+        ///     Gets the value of the YResolution field.
         /// </summary>
         public double DpiY
         {
@@ -83,7 +85,7 @@ namespace Ephemera.Tiff
         }
 
         /// <summary>
-        ///     Gets the width of the image.
+        ///     Gets the value of the ImageWidth field.
         /// </summary>
         public int Width
         {
@@ -95,7 +97,7 @@ namespace Ephemera.Tiff
         }
 
         /// <summary>
-        ///     Gets the height of the image.
+        ///     Gets the value of the ImageLength field.
         /// </summary>
         public int Height
         {
@@ -107,7 +109,7 @@ namespace Ephemera.Tiff
         }
 
         /// <summary>
-        ///     Gets the number of samples per pixel.
+        ///     Gets the value of the SamplesPerPixel field.
         /// </summary>
         public int SamplesPerPixel
         {
@@ -119,19 +121,55 @@ namespace Ephemera.Tiff
         }
 
         /// <summary>
-        ///     Gets the type of image compression.
+        ///     Gets the value of the Compression field.
         /// </summary>
         public CompressionType CompressionType
         {
             get
             {
-                if (!HasTag(TiffTag.Compression)) return CompressionType.UNKNOWN;
+                if (!HasTag(TiffTag.Compression)) return CompressionType.Unknown;
                 return (CompressionType) this[TiffTag.Compression].GetValues<ushort>().First();
             }
         }
 
         /// <summary>
-        ///     Gets the subdirectories.
+        /// Gets the value of the PhotometricInterpretation field.
+        /// </summary>
+        public PhotometricInterpretation PhotometricInterpretation
+        {
+            get
+            {
+                if (!HasTag(TiffTag.PhotometricInterpretation)) return PhotometricInterpretation.Unknown;
+                return (PhotometricInterpretation)this[TiffTag.PhotometricInterpretation].GetValues<ushort>().First();
+            }
+        }
+
+        /// <summary>
+        /// Gets the value of the Threshholding field.
+        /// </summary>
+        public Threshholding Threshholding
+        {
+            get
+            {
+                if (!HasTag(TiffTag.Thresholding)) return Threshholding.Unknown;
+                return (Threshholding)this[TiffTag.Thresholding].GetValues<ushort>().First();
+            }
+        }
+
+        /// <summary>
+        /// Gets the value of the FillOrder field.
+        /// </summary>
+        public FillOrder FillOrder
+        {
+            get
+            {
+                if (!HasTag(TiffTag.FillOrder)) return FillOrder.Unknown;
+                return (FillOrder)this[TiffTag.FillOrder].GetValues<ushort>().First();
+            }
+        }
+
+        /// <summary>
+        ///     Gets the subdirectories, if any.
         /// </summary>
         public IEnumerable<TiffDirectory> Subdirectories
         {
@@ -235,20 +273,14 @@ namespace Ephemera.Tiff
             RemoveField((ushort) tag);
         }
 
-        internal DirectoryBlock Write(BinaryWriter writer)
+        internal DirectoryBlock Write(TiffWriter writer)
         {
-            // store the location of the pointer to this IFD
-            var ifdPointerPos = writer.BaseStream.Position;
-
-            // advance by 4 bytes (the size of the IFD pointer)
-            writer.Seek(4, SeekOrigin.Current);
-
             // write out the image data and update the offsets in the appropriate tag
             var offsetsTag = HasTag(TiffTag.TileOffsets) ? this[TiffTag.TileOffsets] : this[TiffTag.StripOffsets];
             for (var i = 0; i < imageData.Count; ++i)
             {
                 writer.AlignToWordBoundary();
-                offsetsTag.SetValue((uint) writer.BaseStream.Position, i);
+                offsetsTag.SetValue((uint) writer.Position, i);
                 writer.Write(imageData[i], 0, imageData[i].Length);
             }
 
@@ -256,35 +288,29 @@ namespace Ephemera.Tiff
             if (HasTag(TiffTag.JPEGInterchangeFormat) && jfifData != null)
             {
                 writer.AlignToWordBoundary();
-                this[TiffTag.JPEGInterchangeFormat].SetValue((uint) writer.BaseStream.Position);
+                this[TiffTag.JPEGInterchangeFormat].SetValue((uint) writer.Position);
                 writer.Write(jfifData);
             }
 
             // write the tags' data, excluding unknown tags
             foreach (var tag in Fields)
             {
-                if (tag.Value is UnknownTiffField) continue;
                 writer.AlignToWordBoundary();
                 ((ITiffFieldInternal) tag.Value).WriteData(writer);
             }
 
-            // store the position of the start of the IFD. An IFD must begin on a word 
-            // boundary (according to the TIFF 6 spec), so first write any pad bytes required.
+            // store the position of the start of the IFD
             writer.AlignToWordBoundary();
-            var ifdPos = writer.BaseStream.Position;
+            var ifdPos = writer.Position;
 
-            // write the tag count, excluding invalid tags (those with an unknown data type)
-            var tagCount = (ushort) Fields.Count(x => !(x.Value is UnknownTiffField));
-            writer.Write(tagCount);
+            writer.Write((ushort)Fields.Count);
 
-            // write the tags, excluding invalid tags (those with an unknown data type)
-            foreach (var tag in Fields)
+            foreach (var field in Fields)
             {
-                if (tag.Value is UnknownTiffField) continue;
-                ((ITiffFieldInternal) tag.Value).WriteEntry(writer);
+                ((ITiffFieldInternal) field.Value).WriteEntry(writer);
             }
 
-            return new DirectoryBlock(ifdPointerPos, ifdPos, writer.BaseStream.Position);
+            return new DirectoryBlock(ifdPos, writer.BaseStream.Position);
         }
 
         private void ReadDirectory(TiffReader reader)
