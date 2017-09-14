@@ -15,7 +15,7 @@ namespace Ephemera.Tiff
     public class TiffDirectory
     {
         private readonly SortedDictionary<ushort, ITiffField> fields = new SortedDictionary<ushort, ITiffField>();
-        private readonly List<byte[]> imageData = new List<byte[]>();
+        private List<byte[]> imageData = new List<byte[]>();
         private byte[] jfifData;
         private uint jfifLength;
         private uint jfifPointer;
@@ -33,7 +33,7 @@ namespace Ephemera.Tiff
             jfifData = original.jfifData;
             foreach (var tag in original.Fields)
             {
-                fields[tag.Key] = ((ITiffFieldInternal) tag.Value).Clone();
+                fields[tag.Key] = ((ITiffFieldInternal)tag.Value).Clone();
             }
             foreach (var array in original.imageData)
             {
@@ -58,7 +58,7 @@ namespace Ephemera.Tiff
         ///     Gets the <see cref="ITiffField" /> with the specified tag.
         /// </summary>
         /// <param name="tag">The tag.</param>
-        public ITiffField this[TiffTag tag] => HasTag(tag) ? Fields[(ushort) tag] : null;
+        public ITiffField this[TiffTag tag] => HasField(tag) ? Fields[(ushort)tag] : null;
 
         /// <summary>
         ///     Gets the value of the XResolution field.
@@ -67,7 +67,7 @@ namespace Ephemera.Tiff
         {
             get
             {
-                if (!HasTag(TiffTag.XResolution)) return 200d;
+                if (!HasField(TiffTag.XResolution)) return 200d;
                 return this[TiffTag.XResolution].GetValues<double>().First();
             }
         }
@@ -79,7 +79,7 @@ namespace Ephemera.Tiff
         {
             get
             {
-                if (!HasTag(TiffTag.YResolution)) return 200d;
+                if (!HasField(TiffTag.YResolution)) return 200d;
                 return this[TiffTag.YResolution].GetValues<double>().First();
             }
         }
@@ -91,8 +91,8 @@ namespace Ephemera.Tiff
         {
             get
             {
-                if (!HasTag(TiffTag.ImageWidth)) return 0;
-                return (int) this[TiffTag.ImageWidth].GetValues<uint>().First();
+                if (!HasField(TiffTag.ImageWidth)) return 0;
+                return (int)this[TiffTag.ImageWidth].GetValues<uint>().First();
             }
         }
 
@@ -103,8 +103,8 @@ namespace Ephemera.Tiff
         {
             get
             {
-                if (!HasTag(TiffTag.ImageLength)) return 0;
-                return (int) this[TiffTag.ImageLength].GetValues<uint>().First();
+                if (!HasField(TiffTag.ImageLength)) return 0;
+                return (int)this[TiffTag.ImageLength].GetValues<uint>().First();
             }
         }
 
@@ -115,7 +115,7 @@ namespace Ephemera.Tiff
         {
             get
             {
-                if (!HasTag(TiffTag.SamplesPerPixel)) return 1;
+                if (!HasField(TiffTag.SamplesPerPixel)) return 1;
                 return this[TiffTag.SamplesPerPixel].GetValues<ushort>().First();
             }
         }
@@ -127,8 +127,8 @@ namespace Ephemera.Tiff
         {
             get
             {
-                if (!HasTag(TiffTag.Compression)) return CompressionType.Unknown;
-                return (CompressionType) this[TiffTag.Compression].GetValues<ushort>().First();
+                if (!HasField(TiffTag.Compression)) return CompressionType.Unknown;
+                return (CompressionType)this[TiffTag.Compression].GetValues<ushort>().First();
             }
         }
 
@@ -139,7 +139,7 @@ namespace Ephemera.Tiff
         {
             get
             {
-                if (!HasTag(TiffTag.PhotometricInterpretation)) return PhotometricInterpretation.Unknown;
+                if (!HasField(TiffTag.PhotometricInterpretation)) return PhotometricInterpretation.Unknown;
                 return (PhotometricInterpretation)this[TiffTag.PhotometricInterpretation].GetValues<ushort>().First();
             }
         }
@@ -151,7 +151,7 @@ namespace Ephemera.Tiff
         {
             get
             {
-                if (!HasTag(TiffTag.Thresholding)) return Threshholding.Unknown;
+                if (!HasField(TiffTag.Thresholding)) return Threshholding.Unknown;
                 return (Threshholding)this[TiffTag.Thresholding].GetValues<ushort>().First();
             }
         }
@@ -163,7 +163,7 @@ namespace Ephemera.Tiff
         {
             get
             {
-                if (!HasTag(TiffTag.FillOrder)) return FillOrder.Unknown;
+                if (!HasField(TiffTag.FillOrder)) return FillOrder.Unknown;
                 return (FillOrder)this[TiffTag.FillOrder].GetValues<ushort>().First();
             }
         }
@@ -175,7 +175,7 @@ namespace Ephemera.Tiff
         {
             get
             {
-                if (!HasTag(TiffTag.SubIFDs)) return new List<TiffDirectory>();
+                if (!HasField(TiffTag.SubIFDs)) return new List<TiffDirectory>();
                 if (this[TiffTag.SubIFDs] is SubIfdTiffField tag)
                     return tag.SubIFDs;
                 return new List<TiffDirectory>();
@@ -219,8 +219,8 @@ namespace Ephemera.Tiff
         /// <param name="subDirectory">The subdirectory to add.</param>
         public void AddSubdirectory(TiffDirectory subDirectory)
         {
-            if (!HasTag(TiffTag.SubIFDs))
-                fields[(ushort) TiffTag.SubIFDs] = new SubIfdTiffField(subDirectory);
+            if (!HasField(TiffTag.SubIFDs))
+                fields[(ushort)TiffTag.SubIFDs] = new SubIfdTiffField(subDirectory);
             else
             {
                 if (this[TiffTag.SubIFDs] is SubIfdTiffField tag)
@@ -233,9 +233,9 @@ namespace Ephemera.Tiff
         /// </summary>
         /// <param name="tag"></param>
         /// <returns><c>true</c> if the directory has the field, else <c>false</c>.</returns>
-        public bool HasTag(TiffTag tag)
+        public bool HasField(TiffTag tag)
         {
-            return Fields.ContainsKey((ushort) tag);
+            return Fields.ContainsKey((ushort)tag);
         }
 
         /// <summary>
@@ -243,7 +243,7 @@ namespace Ephemera.Tiff
         /// </summary>
         /// <param name="tagNumber"></param>
         /// <returns><c>true</c> if the directory has the field, else <c>false</c>.</returns>
-        public bool HasTag(ushort tagNumber)
+        public bool HasField(ushort tagNumber)
         {
             return Fields.ContainsKey(tagNumber);
         }
@@ -255,7 +255,7 @@ namespace Ephemera.Tiff
         /// <exception cref="System.InvalidOperationException">Tag number designates a required field, which cannot be removed.</exception>
         public void RemoveField(ushort tagNumber)
         {
-            if (!HasTag(tagNumber)) return;
+            if (!HasField(tagNumber)) return;
             var field = this[tagNumber];
             if (TiffConstants.RequiredTags.Contains(tagNumber))
                 throw new InvalidOperationException(
@@ -270,47 +270,98 @@ namespace Ephemera.Tiff
         /// <exception cref="System.InvalidOperationException">Tag number designates a required field, which cannot be removed.</exception>
         public void RemoveField(TiffTag tag)
         {
-            RemoveField((ushort) tag);
+            RemoveField((ushort)tag);
         }
 
-        internal DirectoryBlock Write(TiffWriter writer)
+        internal DirectoryBlock Write(TiffWriter writer, TiffOptions options)
         {
-            // write out the image data and update the offsets in the appropriate tag
-            var offsetsTag = HasTag(TiffTag.TileOffsets) ? this[TiffTag.TileOffsets] : this[TiffTag.StripOffsets];
-            for (var i = 0; i < imageData.Count; ++i)
+            var dir = this;
+
+            if (options.HasFlag(TiffOptions.ConvertOJPEGToJPEG) && dir.HasField(TiffTag.JPEGInterchangeFormat) && dir.jfifData != null)
             {
-                writer.AlignToWordBoundary();
-                offsetsTag.SetValue((uint) writer.Position, i);
-                writer.Write(imageData[i], 0, imageData[i].Length);
+                dir = ConvertOjpegToJpeg(dir);
+            }
+            else
+            {
+                // if there is jfif data, write it out and update the JPEGInterchageFormat tag
+                if (HasField(TiffTag.JPEGInterchangeFormat) && jfifData != null)
+                {
+                    writer.AlignToWordBoundary();
+                    this[TiffTag.JPEGInterchangeFormat].SetValue((uint)writer.Position);
+                    writer.Write(jfifData);
+                }
             }
 
-            // if there is jfif data, write it out and update the JPEGInterchageFormat tag
-            if (HasTag(TiffTag.JPEGInterchangeFormat) && jfifData != null)
+            // write out the image data and update the offsets in the appropriate tag
+            var offsetsTag = dir.HasField(TiffTag.TileOffsets) ? dir[TiffTag.TileOffsets] : dir[TiffTag.StripOffsets];
+            for (var i = 0; i < dir.imageData.Count; ++i)
             {
                 writer.AlignToWordBoundary();
-                this[TiffTag.JPEGInterchangeFormat].SetValue((uint) writer.Position);
-                writer.Write(jfifData);
+                offsetsTag.SetValue((uint)writer.Position, i);
+                writer.Write(dir.imageData[i], 0, dir.imageData[i].Length);
             }
 
             // write the tags' data, excluding unknown tags
-            foreach (var tag in Fields)
+            foreach (var tag in dir.Fields)
             {
                 writer.AlignToWordBoundary();
-                ((ITiffFieldInternal) tag.Value).WriteData(writer);
+                ((ITiffFieldInternal)tag.Value).WriteData(writer);
             }
 
             // store the position of the start of the IFD
             writer.AlignToWordBoundary();
             var ifdPos = writer.Position;
 
-            writer.Write((ushort)Fields.Count);
+            writer.Write((ushort)dir.Fields.Count);
 
-            foreach (var field in Fields)
+            foreach (var field in dir.Fields)
             {
-                ((ITiffFieldInternal) field.Value).WriteEntry(writer);
+                ((ITiffFieldInternal)field.Value).WriteEntry(writer);
             }
 
             return new DirectoryBlock(ifdPos, writer.BaseStream.Position);
+        }
+
+        private TiffDirectory ConvertOjpegToJpeg(TiffDirectory dir)
+        {
+            dir = new TiffDirectory(this);
+            var jfifEnd = dir.jfifPointer + dir.jfifLength;
+
+            if (dir.HasField(TiffTag.JPEGQTables))
+            {
+                if (dir[TiffTag.JPEGQTables].GetValues<int>().All(x => x > dir.jfifPointer && x < jfifEnd))
+                    dir.RemoveField(TiffTag.JPEGQTables);
+            }
+
+            if (dir.HasField(TiffTag.JPEGDCTables))
+            {
+                if (dir[TiffTag.JPEGDCTables].GetValues<int>().All(x => x > dir.jfifPointer && x < jfifEnd))
+                    dir.RemoveField(TiffTag.JPEGDCTables);
+            }
+
+            if (dir.HasField(TiffTag.JPEGACTables))
+            {
+                if (dir[TiffTag.JPEGACTables].GetValues<int>().All(x => x > dir.jfifPointer && x < jfifEnd))
+                    dir.RemoveField(TiffTag.JPEGACTables);
+            }
+
+            dir.RemoveField(TiffTag.JPEGInterchangeFormat);
+            dir.RemoveField(TiffTag.JPEGInterchangeFormatLength);
+            dir.RemoveField(TiffTag.JPEGProc);
+            dir.RemoveField(TiffTag.JPEGRestartInterval);
+            dir.RemoveField(TiffTag.JPEGLosslessPredictors);
+            dir.RemoveField(TiffTag.JPEGPointTransforms);
+
+            dir[TiffTag.Compression].SetValue((ushort)CompressionType.JPEG);
+            dir.imageData = new List<byte[]> { dir.jfifData };
+
+            var offsetsTag = new LongTiffField((ushort)TiffTag.StripOffsets, 0);
+            dir.fields[(ushort)TiffTag.StripOffsets] = offsetsTag;
+
+            var countsTag = new LongTiffField((ushort)TiffTag.StripByteCounts, dir.jfifLength);
+            dir.fields[(ushort)TiffTag.StripByteCounts] = countsTag;
+
+            return dir;
         }
 
         private void ReadDirectory(TiffReader reader)
@@ -318,16 +369,16 @@ namespace Ephemera.Tiff
             var numTags = reader.ReadUInt16();
             for (var i = 0; i < numTags; ++i)
             {
-                var tag = TiffFieldFactory.ReadField(reader);
-                if (tag == null) continue;
+                var field = TiffFieldFactory.ReadField(reader);
+                if (field == null) continue;
 
-                fields[tag.TagNum] = tag;
+                fields[field.TagNum] = field;
 
-                if (tag.Tag == TiffTag.JPEGInterchangeFormat)
-                    jfifPointer = tag.GetValues<uint>().First();
+                if (field.Tag == TiffTag.JPEGInterchangeFormat)
+                    jfifPointer = field.GetValue<uint>();
 
-                if (tag.Tag == TiffTag.JPEGInterchangeFormatLength)
-                    jfifLength = tag.GetValues<uint>().First();
+                if (field.Tag == TiffTag.JPEGInterchangeFormatLength)
+                    jfifLength = field.GetValue<uint>();
             }
 
             NextIfdOffset = reader.ReadUInt32();
@@ -338,11 +389,11 @@ namespace Ephemera.Tiff
 
         private void ReadImageData(TiffReader reader)
         {
-            var offsets = HasTag(TiffTag.TileOffsets)
+            var offsets = HasField(TiffTag.TileOffsets)
                 ? this[TiffTag.TileOffsets].GetValues<uint>().ToList()
                 : this[TiffTag.StripOffsets].GetValues<uint>().ToList();
 
-            var counts = HasTag(TiffTag.TileByteCounts)
+            var counts = HasField(TiffTag.TileByteCounts)
                 ? this[TiffTag.TileByteCounts].GetValues<uint>().ToList()
                 : this[TiffTag.StripByteCounts].GetValues<uint>().ToList();
 
@@ -359,19 +410,19 @@ namespace Ephemera.Tiff
 
         private void ReadJpegData(TiffReader reader)
         {
-            if (!HasTag(TiffTag.JPEGInterchangeFormat)) return;
+            if (!HasField(TiffTag.JPEGInterchangeFormat) || jfifPointer == 0) return;
 
-            if (!HasTag(TiffTag.JPEGInterchangeFormatLength))
+            if (!HasField(TiffTag.JPEGInterchangeFormatLength))
             {
                 // bad ojpeg, no JFIF length given. assume that JFIF data extents from the JFIF offset
                 // to the beginning of the next IFD (this may or may not be the case, but it's the best
-                // we can do given the circumstances.
+                // we can do under the circumstances).
                 if (NextIfdOffset > 0) jfifLength = NextIfdOffset - jfifPointer;
-                else jfifLength = (uint) (reader.BaseStream.Length - jfifPointer);
+                else jfifLength = (uint)(reader.BaseStream.Length - jfifPointer);
 
                 // be nice to future decoders, and add the JFIF length tag.
-                fields[(ushort) TiffTag.JPEGInterchangeFormatLength] =
-                    new LongTiffField((ushort) TiffTag.JPEGInterchangeFormatLength, jfifLength);
+                fields[(ushort)TiffTag.JPEGInterchangeFormatLength] =
+                    new LongTiffField((ushort)TiffTag.JPEGInterchangeFormatLength, jfifLength);
             }
 
             jfifData = reader.ReadNBytes(jfifPointer, jfifLength);

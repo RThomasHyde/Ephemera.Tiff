@@ -72,6 +72,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TiffException.cs" />
     <Compile Include="Infrastructure\TiffFieldFactory.cs" />
+    <Compile Include="TiffOptions.cs" />
     <Compile Include="TiffTag.cs" />
     <Compile Include="TiffFieldType.cs" />
   </ItemGroup>

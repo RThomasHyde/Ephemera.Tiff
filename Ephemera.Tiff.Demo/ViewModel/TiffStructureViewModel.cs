@@ -120,7 +120,7 @@ namespace Ephemera.Tiff.Demo.ViewModel
             var values = fieldVm.GetValues().ToList();
 
             var directory = SelectedDirectoryViewModel.Directory;
-            if (directory.HasTag(fieldVm.TagNumber))
+            if (directory.HasField(fieldVm.TagNumber))
             {
                 dialogService.ShowMessage("The specified field already exists, and cannot be overwritten.", "Error");
                 return;

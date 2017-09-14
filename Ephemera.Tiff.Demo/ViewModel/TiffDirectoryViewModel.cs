@@ -40,7 +40,7 @@ namespace Ephemera.Tiff.Demo.ViewModel
 
         public void AddField(ushort tagNumber, TiffFieldType type, IList<object> values)
         {
-            if (Directory.HasTag(tagNumber))
+            if (Directory.HasField(tagNumber))
             {
                 dialogService.ShowMessage("The specified field already exists, and cannot be overwritten.", "Error");
                 return;

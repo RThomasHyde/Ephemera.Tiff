@@ -56,7 +56,7 @@ namespace Ephemera.Tiff.Fields
 
             for (int i = 0; i < Count; ++i)
             {
-                DirectoryBlock block = subIfds[i].Write(writer);
+                DirectoryBlock block = subIfds[i].Write(writer, TiffOptions.None);
                 Values[i] = (uint)block.IFDPosition;
             }
         }

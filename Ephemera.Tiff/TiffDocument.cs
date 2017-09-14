@@ -96,7 +96,7 @@ namespace Ephemera.Tiff
         ///     Adds a directory.
         /// </summary>
         /// <param name="directory">A <see cref="TiffDirectory" /> instance.</param>
-        public void AddPage(TiffDirectory directory)
+        public void AddDirectory(TiffDirectory directory)
         {
             Directories.Add(directory);
         }
@@ -153,31 +153,41 @@ namespace Ephemera.Tiff
         }
 
         /// <summary>
-        ///     Writes the TIFF image to a file.
+        /// Writes the TIFF image to a file.
         /// </summary>
         /// <param name="fileName">The output file name.</param>
-        public void Write(string fileName)
+        /// <param name="options">Option flags.</param>
+        public void Write(string fileName, TiffOptions options = TiffOptions.ConvertOJPEGToJPEG)
         {
             using (var stream = new FileStream(fileName, FileMode.Create))
-                Write(stream);
+                Write(stream, options);
         }
 
         /// <summary>
-        ///     Writes a TIFF file consisting of the specified directory.
+        /// Writes a TIFF file consisting of the specified directory.
         /// </summary>
         /// <param name="fileName">The output file name</param>
         /// <param name="index">The index of the directory to write (1-based).</param>
-        public void Write(string fileName, int index)
+        /// <param name="options">Option flags.</param>
+        public void Write(string fileName, int index, TiffOptions options = TiffOptions.ConvertOJPEGToJPEG)
         {
             using (var stream = new FileStream(fileName, FileMode.Create))
-                Write(stream, index);
+                Write(stream, index, options);
         }
 
         /// <summary>
-        ///     Writes the TIFF image to the specified stream.
+        /// Writes the TIFF image to the specified stream.
         /// </summary>
         /// <param name="stream">A writable wtream.</param>
-        public void Write(Stream stream)
+        /// <param name="options">Option flags.</param>
+        /// <exception cref="TiffException">
+        /// Cannot write a TiffDocument with no pages.
+        /// or
+        /// Stream is not writeable
+        /// or
+        /// The TiffDocument could not be written to the stream. See inner exception for details.
+        /// </exception>
+        public void Write(Stream stream, TiffOptions options = TiffOptions.ConvertOJPEGToJPEG)
         {
             if (Directories.Count == 0)
                 throw new TiffException("Cannot write a TiffDocument with no pages.");
@@ -189,7 +199,7 @@ namespace Ephemera.Tiff
             {
                 var writer = new TiffWriter(stream);
                 writer.WriteHeader();
-                Directories.ForEach(dir => WriteDirectory(writer, dir));
+                Directories.ForEach(dir => WriteDirectory(writer, dir, options));
                 writer.Flush();
             }
             catch (Exception e)
@@ -200,11 +210,19 @@ namespace Ephemera.Tiff
         }
 
         /// <summary>
-        ///     Writes a TIFF image consisting of the specified directory to the specified stream.
+        /// Writes a TIFF image consisting of the specified directory to the specified stream.
         /// </summary>
         /// <param name="stream">A writable wtream.</param>
         /// <param name="index">The index of the directory to write (1-based).</param>
-        public void Write(Stream stream, int index)
+        /// <param name="options">Option flags.</param>
+        /// <exception cref="TiffException">
+        /// Cannot write a TiffDocument with no pages.
+        /// or
+        /// Stream is not writeable.
+        /// or
+        /// The TiffDocument could not be written to the stream. See inner exception for details.
+        /// </exception>
+        public void Write(Stream stream, int index, TiffOptions options = TiffOptions.ConvertOJPEGToJPEG)
         {
             if (Directories.Count == 0)
                 throw new TiffException("Cannot write a TiffDocument with no pages.");
@@ -222,7 +240,7 @@ namespace Ephemera.Tiff
                     var ifdPointer = writer.Position;
 
                     // write the directory
-                    var block = Directories[index - 1].Write(writer);
+                    var block = Directories[index - 1].Write(writer, options);
 
                     // go back and update the pointer to the directory
                     writer.Seek(ifdPointer, SeekOrigin.Begin);
@@ -239,42 +257,52 @@ namespace Ephemera.Tiff
         }
 
         /// <summary>
-        ///     Appends the directories of this instance to the specified TIFF file.
+        /// Appends the directories of this instance to the specified TIFF file.
         /// </summary>
         /// <param name="filename">The output file name.</param>
+        /// <param name="options">Option flags.</param>
         /// <remarks>
-        ///     If the specified file does not already exist it will be created.
+        /// If the specified file does not already exist it will be created.
         /// </remarks>
-        public void WriteAppend(string filename)
+        public void WriteAppend(string filename, TiffOptions options = TiffOptions.ConvertOJPEGToJPEG)
         {
             using (var fs = new FileStream(filename, FileMode.OpenOrCreate))
-                WriteAppend(fs);
+                WriteAppend(fs, options);
         }
 
         /// <summary>
-        ///     Appends the specified directory to an existing TIFF file.
+        /// Appends the specified directory to an existing TIFF file.
         /// </summary>
         /// <param name="filename">The output file name.</param>
         /// <param name="index">The index of the directory to write (1-based).</param>
+        /// <param name="options">Option flags.</param>
         /// <remarks>
-        ///     If the specified file does not exist, it will be created.
+        /// If the specified file does not exist, it will be created.
         /// </remarks>
-        public void WriteAppend(string filename, int index)
+        public void WriteAppend(string filename, int index, TiffOptions options = TiffOptions.ConvertOJPEGToJPEG)
         {
             using (var fs = new FileStream(filename, FileMode.OpenOrCreate))
-                WriteAppend(fs, index);
+                WriteAppend(fs, index, options);
         }
 
         /// <summary>
-        ///     Appends this instance's directories to a TIFF image stream.
+        /// Appends this instance's directories to a TIFF image stream.
         /// </summary>
         /// <param name="stream">A readable/writable TIFF stream.</param>
+        /// <param name="options">Option flags.</param>
+        /// <exception cref="TiffException">
+        /// Cannot write a TiffDocument with no pages.
+        /// or
+        /// Stream is not readable/writeable.
+        /// or
+        /// The TiffDocument could not be appended to the stream. See inner exception for details.
+        /// </exception>
         /// <remarks>
-        ///     If the stream is empty, a TIFF header will be written so that the stream will contain
-        ///     a complete TIFF image. Otherwise the stream is expected to be positioned at the start
-        ///     of the TIFF header.
+        /// If the stream is empty, a TIFF header will be written so that the stream will contain
+        /// a complete TIFF image. Otherwise the stream is expected to be positioned at the start
+        /// of the TIFF header.
         /// </remarks>
-        public void WriteAppend(Stream stream)
+        public void WriteAppend(Stream stream, TiffOptions options = TiffOptions.ConvertOJPEGToJPEG)
         {
             if (Directories.Count == 0)
                 throw new TiffException("Cannot write a TiffDocument with no pages.");
@@ -300,7 +328,7 @@ namespace Ephemera.Tiff
                     writer = new TiffWriter(stream, reader.ByteOrder);
                 }
 
-                Directories.ForEach(dir => WriteDirectory(writer, dir));
+                Directories.ForEach(dir => WriteDirectory(writer, dir, options));
                 writer.Flush();
             }
             catch (Exception e)
@@ -311,16 +339,25 @@ namespace Ephemera.Tiff
         }
 
         /// <summary>
-        ///     Appends the specified directory to a TIFF stream.
+        /// Appends the specified directory to a TIFF stream.
         /// </summary>
         /// <param name="stream">A readable/writable TIFF stream.</param>
         /// <param name="index">The index of the directory to write (1-based).</param>
+        /// <param name="options">Option flags.</param>
+        /// <exception cref="TiffException">
+        /// Cannot write a TiffDocument with no pages.
+        /// or
+        /// Stream is not readable/writeable.
+        /// or
+        /// The specified page could not be written to the stream. See inner exception for details.
+        /// </exception>
+        /// <exception cref="ArgumentException">Value out of range, must be greater than 0 and less then or equal to the page count. - index</exception>
         /// <remarks>
-        ///     If the stream is empty, a TIFF header will be written so that the stream will contain
-        ///     a complete TIFF image. Otherwise the stream is expected to be positioned at the start
-        ///     of the TIFF header.
+        /// If the stream is empty, a TIFF header will be written so that the stream will contain
+        /// a complete TIFF image. Otherwise the stream is expected to be positioned at the start
+        /// of the TIFF header.
         /// </remarks>
-        public void WriteAppend(Stream stream, int index)
+        public void WriteAppend(Stream stream, int index, TiffOptions options = TiffOptions.ConvertOJPEGToJPEG)
         {
             if (Directories.Count == 0)
                 throw new TiffException("Cannot write a TiffDocument with no pages.");
@@ -338,8 +375,8 @@ namespace Ephemera.Tiff
             try
             {
                 var doc = new TiffDocument();
-                doc.AddPage(Directories[index - 1]);
-                doc.WriteAppend(stream);
+                doc.AddDirectory(Directories[index - 1]);
+                doc.WriteAppend(stream, options);
             }
             catch (Exception e)
             {
@@ -397,7 +434,7 @@ namespace Ephemera.Tiff
             return reader.ReadUInt32();
         }
 
-        private static void WriteDirectory(TiffWriter writer, TiffDirectory directory)
+        private static void WriteDirectory(TiffWriter writer, TiffDirectory directory, TiffOptions options)
         {
             // store the position of the offset to the directory we're about to write
             var ifdPointerPos = writer.BaseStream.Position;
@@ -407,7 +444,7 @@ namespace Ephemera.Tiff
 
             // seek to the end of the stream and write the directory
             writer.BaseStream.Seek(0, SeekOrigin.End);
-            var directoryBlock = directory.Write(writer);
+            var directoryBlock = directory.Write(writer, options);
 
             // write zero as next IFD offset
             writer.BaseStream.Seek(directoryBlock.NextIFDPosition, SeekOrigin.Begin);

@@ -362,7 +362,7 @@ namespace TiffDocumentTest
             Assert.Equal(2, dir[TiffTag.ResolutionUnit].GetValue<int>());
             Assert.Equal("HP IL v1.1", dir[TiffTag.Software].GetValue<string>());
             Assert.Equal(1, dir[TiffTag.JPEGProc].GetValue<int>());
-            Assert.True(dir.HasTag(TiffTag.JPEGInterchangeFormat));
+            Assert.True(dir.HasField(TiffTag.JPEGInterchangeFormat));
             Assert.Equal(4608, dir[TiffTag.JPEGInterchangeFormatLength].GetValue<int>());
             Assert.Equal(0, dir[TiffTag.JPEGRestartInterval].GetValue<int>());
             Assert.Equal(3, dir[TiffTag.JPEGQTables].Count);
