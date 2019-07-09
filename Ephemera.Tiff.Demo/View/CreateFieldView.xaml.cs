@@ -14,7 +14,7 @@ namespace Ephemera.Tiff.Demo.View
             InitializeComponent();
         }
 
-        private void PreviewTextInput(object sender, TextCompositionEventArgs e)
+        private new void PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
             e.Handled = !IsAllowed(e.Text);
         }

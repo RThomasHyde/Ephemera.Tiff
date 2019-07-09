@@ -99,7 +99,7 @@ namespace Ephemera.Tiff.Demo.ViewModel
                         break;
                 }
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 dialogService.ShowMessage("The field could not be added because one or more values could not be converted to the specified data type.", "Error");
                 return;

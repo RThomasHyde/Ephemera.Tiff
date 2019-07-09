@@ -3,6 +3,9 @@ using System.Collections.Generic;
 
 namespace Ephemera.Tiff
 {
+    /// <summary>
+    /// Interface representing a field in the TIFF data structure.
+    /// </summary>
     public interface ITiffField
     {
         /// <summary>
