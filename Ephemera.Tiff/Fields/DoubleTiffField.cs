@@ -8,6 +8,8 @@ namespace Ephemera.Tiff.Fields
     [DebuggerDisplay("{Tag} ({Type})")]
     internal sealed class DoubleTiffField : TiffFieldBase<double>, ITiffFieldInternal
     {
+        public override bool IsComplex => true;
+
         internal DoubleTiffField(ushort tag, TiffReader reader = null)
         {
             TagNum = tag;

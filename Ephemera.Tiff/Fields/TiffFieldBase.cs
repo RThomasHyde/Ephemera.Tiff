@@ -7,6 +7,7 @@ namespace Ephemera.Tiff.Fields
 {
     internal abstract class TiffFieldBase<TValue> : ITiffFieldInternal
     {
+        public virtual bool IsComplex => false;
         public ushort TagNum { get; protected set; }
         public ushort TypeNum { get; protected set; }
         protected List<TValue> Values { get; set; }

@@ -17,7 +17,7 @@ namespace Ephemera.Tiff
     /// </remarks>
     [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
     [SuppressMessage("ReSharper", "UnusedMember.Global")]
-    public class TiffDocument
+    public class TiffDocument : IDisposable
     {
         /// <summary>
         /// Counts the pages.
@@ -157,7 +157,12 @@ namespace Ephemera.Tiff
         /// </summary>
         /// <param name="fileName">The output file name.</param>
         /// <param name="options">Option flags.</param>
-        public void Write(string fileName, TiffOptions options = TiffOptions.ConvertOJPEGToJPEG)
+        /// <remarks>
+        /// By default, OJPEG compression will be retained in the output file. Passing
+        /// TiffOptions.ConvertOJPEGToJPEG will rewrite JPEG tags to comply with the newer
+        /// JPEG spec defined in Tech Note 2 of the TIFF specification.
+        /// </remarks>
+        public void Write(string fileName, TiffOptions options = TiffOptions.None)
         {
             using (var stream = new FileStream(fileName, FileMode.Create))
                 Write(stream, options);
@@ -169,7 +174,12 @@ namespace Ephemera.Tiff
         /// <param name="fileName">The output file name</param>
         /// <param name="index">The index of the directory to write (1-based).</param>
         /// <param name="options">Option flags.</param>
-        public void Write(string fileName, int index, TiffOptions options = TiffOptions.ConvertOJPEGToJPEG)
+        /// <remarks>
+        /// By default, OJPEG compression will be retained in the output file. Passing
+        /// TiffOptions.ConvertOJPEGToJPEG will rewrite JPEG tags to comply with the newer
+        /// JPEG spec defined in Tech Note 2 of the TIFF specification.
+        /// </remarks>
+        public void Write(string fileName, int index, TiffOptions options = TiffOptions.None)
         {
             using (var stream = new FileStream(fileName, FileMode.Create))
                 Write(stream, index, options);
@@ -180,6 +190,11 @@ namespace Ephemera.Tiff
         /// </summary>
         /// <param name="stream">A writable wtream.</param>
         /// <param name="options">Option flags.</param>
+        /// <remarks>
+        /// By default, OJPEG compression will be retained in the output file. Passing
+        /// TiffOptions.ConvertOJPEGToJPEG will rewrite JPEG tags to comply with the newer
+        /// JPEG spec defined in Tech Note 2 of the TIFF specification.
+        /// </remarks>
         /// <exception cref="TiffException">
         /// Cannot write a TiffDocument with no pages.
         /// or
@@ -187,7 +202,7 @@ namespace Ephemera.Tiff
         /// or
         /// The TiffDocument could not be written to the stream. See inner exception for details.
         /// </exception>
-        public void Write(Stream stream, TiffOptions options = TiffOptions.ConvertOJPEGToJPEG)
+        public void Write(Stream stream, TiffOptions options = TiffOptions.None)
         {
             if (Directories.Count == 0)
                 throw new TiffException("Cannot write a TiffDocument with no pages.");
@@ -200,6 +215,7 @@ namespace Ephemera.Tiff
                 var writer = new TiffWriter(stream);
                 writer.WriteHeader();
                 Directories.ForEach(dir => WriteDirectory(writer, dir, options));
+                writer.Write((uint)0);
                 writer.Flush();
             }
             catch (Exception e)
@@ -216,13 +232,18 @@ namespace Ephemera.Tiff
         /// <param name="index">The index of the directory to write (1-based).</param>
         /// <param name="options">Option flags.</param>
         /// <exception cref="TiffException">
+        /// <remarks>
+        /// By default, OJPEG compression will be retained in the output file. Passing
+        /// TiffOptions.ConvertOJPEGToJPEG will rewrite JPEG tags to comply with the newer
+        /// JPEG spec defined in Tech Note 2 of the TIFF specification.
+        /// </remarks>
         /// Cannot write a TiffDocument with no pages.
         /// or
         /// Stream is not writeable.
         /// or
         /// The TiffDocument could not be written to the stream. See inner exception for details.
         /// </exception>
-        public void Write(Stream stream, int index, TiffOptions options = TiffOptions.ConvertOJPEGToJPEG)
+        public void Write(Stream stream, int index, TiffOptions options = TiffOptions.None)
         {
             if (Directories.Count == 0)
                 throw new TiffException("Cannot write a TiffDocument with no pages.");
@@ -239,14 +260,18 @@ namespace Ephemera.Tiff
                     // store the position of the directory offset
                     var ifdPointer = writer.Position;
 
+                    // write a placeholder for the IFD pointer
+                    writer.Write((uint)0);
+
                     // write the directory
                     var block = Directories[index - 1].Write(writer, options);
 
                     // go back and update the pointer to the directory
                     writer.Seek(ifdPointer, SeekOrigin.Begin);
-                    writer.Write(block.IFDPosition);
+                    writer.Write((uint)block.IFDPosition);
 
                     writer.Seek(block.NextIFDPosition, SeekOrigin.Begin);
+                    writer.Write((uint)0);
                 }
             }
             catch (Exception e)
@@ -263,8 +288,11 @@ namespace Ephemera.Tiff
         /// <param name="options">Option flags.</param>
         /// <remarks>
         /// If the specified file does not already exist it will be created.
+        /// By default, OJPEG compression will be retained in the output file. Passing
+        /// TiffOptions.ConvertOJPEGToJPEG will rewrite JPEG tags to comply with the newer
+        /// JPEG spec defined in Tech Note 2 of the TIFF specification.
         /// </remarks>
-        public void WriteAppend(string filename, TiffOptions options = TiffOptions.ConvertOJPEGToJPEG)
+        public void WriteAppend(string filename, TiffOptions options = TiffOptions.None)
         {
             using (var fs = new FileStream(filename, FileMode.OpenOrCreate))
                 WriteAppend(fs, options);
@@ -277,9 +305,12 @@ namespace Ephemera.Tiff
         /// <param name="index">The index of the directory to write (1-based).</param>
         /// <param name="options">Option flags.</param>
         /// <remarks>
-        /// If the specified file does not exist, it will be created.
+        /// If the specified file does not already exist it will be created.
+        /// By default, OJPEG compression will be retained in the output file. Passing
+        /// TiffOptions.ConvertOJPEGToJPEG will rewrite JPEG tags to comply with the newer
+        /// JPEG spec defined in Tech Note 2 of the TIFF specification.
         /// </remarks>
-        public void WriteAppend(string filename, int index, TiffOptions options = TiffOptions.ConvertOJPEGToJPEG)
+        public void WriteAppend(string filename, int index, TiffOptions options = TiffOptions.None)
         {
             using (var fs = new FileStream(filename, FileMode.OpenOrCreate))
                 WriteAppend(fs, index, options);
@@ -300,9 +331,11 @@ namespace Ephemera.Tiff
         /// <remarks>
         /// If the stream is empty, a TIFF header will be written so that the stream will contain
         /// a complete TIFF image. Otherwise the stream is expected to be positioned at the start
-        /// of the TIFF header.
+        /// of the TIFF header. By default, OJPEG compression will be retained in the output file.
+        /// Passing TiffOptions.ConvertOJPEGToJPEG will rewrite JPEG tags to comply with the newer
+        /// JPEG spec defined in Tech Note 2 of the TIFF specification.
         /// </remarks>
-        public void WriteAppend(Stream stream, TiffOptions options = TiffOptions.ConvertOJPEGToJPEG)
+        public void WriteAppend(Stream stream, TiffOptions options = TiffOptions.None)
         {
             if (Directories.Count == 0)
                 throw new TiffException("Cannot write a TiffDocument with no pages.");
@@ -355,9 +388,11 @@ namespace Ephemera.Tiff
         /// <remarks>
         /// If the stream is empty, a TIFF header will be written so that the stream will contain
         /// a complete TIFF image. Otherwise the stream is expected to be positioned at the start
-        /// of the TIFF header.
+        /// of the TIFF header. By default, OJPEG compression will be retained in the output file.
+        /// Passing TiffOptions.ConvertOJPEGToJPEG will rewrite JPEG tags to comply with the newer
+        /// JPEG spec defined in Tech Note 2 of the TIFF specification.
         /// </remarks>
-        public void WriteAppend(Stream stream, int index, TiffOptions options = TiffOptions.ConvertOJPEGToJPEG)
+        public void WriteAppend(Stream stream, int index, TiffOptions options = TiffOptions.None)
         {
             if (Directories.Count == 0)
                 throw new TiffException("Cannot write a TiffDocument with no pages.");
@@ -456,6 +491,13 @@ namespace Ephemera.Tiff
 
             // return to the start of the next directory
             writer.BaseStream.Seek(directoryBlock.NextIFDPosition, SeekOrigin.Begin);
+        }
+
+        /// <summary>
+        /// TiffDocument does not need to be disposed; this was left in for backward-compatibility
+        /// </summary>
+        public void Dispose()
+        {
         }
     }
 }

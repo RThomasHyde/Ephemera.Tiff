@@ -12,7 +12,7 @@ namespace Ephemera.Tiff
     ///     Represents a TIFF image file directory (IFD), which is essentially a page within a TIFF document.
     /// </summary>
     [SuppressMessage("ReSharper", "UnusedMember.Global")]
-    public class TiffDirectory
+    public class TiffDirectory : IDisposable
     {
         private readonly SortedDictionary<ushort, ITiffField> fields = new SortedDictionary<ushort, ITiffField>();
         private List<byte[]> imageData = new List<byte[]>();
@@ -184,6 +184,8 @@ namespace Ephemera.Tiff
 
         internal uint NextIfdOffset { get; private set; }
 
+        internal byte[] JfifData => jfifData;
+
         /// <summary>
         ///     Adds a new field to the directory, with the specified tag number and values.
         /// </summary>
@@ -276,6 +278,7 @@ namespace Ephemera.Tiff
         internal DirectoryBlock Write(TiffWriter writer, TiffOptions options)
         {
             var dir = this;
+            bool writeImageData = true;
 
             if (options.HasFlag(TiffOptions.ConvertOJPEGToJPEG) && dir.HasField(TiffTag.JPEGInterchangeFormat) && dir.jfifData != null)
             {
@@ -289,21 +292,27 @@ namespace Ephemera.Tiff
                     writer.AlignToWordBoundary();
                     this[TiffTag.JPEGInterchangeFormat].SetValue((uint)writer.Position);
                     writer.Write(jfifData);
+                    writeImageData = false;
                 }
             }
 
             // write out the image data and update the offsets in the appropriate tag
             var offsetsTag = dir.HasField(TiffTag.TileOffsets) ? dir[TiffTag.TileOffsets] : dir[TiffTag.StripOffsets];
-            for (var i = 0; i < dir.imageData.Count; ++i)
+            if (writeImageData)
             {
-                writer.AlignToWordBoundary();
-                offsetsTag.SetValue((uint)writer.Position, i);
-                writer.Write(dir.imageData[i], 0, dir.imageData[i].Length);
+                for (var i = 0; i < dir.imageData.Count; ++i)
+                {
+                    writer.AlignToWordBoundary();
+                    offsetsTag.SetValue((uint) writer.Position, i);
+                    writer.Write(dir.imageData[i], 0, dir.imageData[i].Length);
+                }
             }
 
-            // write the tags' data, excluding unknown tags
+            // write the tags' data
             foreach (var tag in dir.Fields)
             {
+                if (tag.Value.Tag == TiffTag.Unknown && options.HasFlag(TiffOptions.StripUnknownTags))
+                    continue;
                 writer.AlignToWordBoundary();
                 ((ITiffFieldInternal)tag.Value).WriteData(writer);
             }
@@ -312,11 +321,16 @@ namespace Ephemera.Tiff
             writer.AlignToWordBoundary();
             var ifdPos = writer.Position;
 
-            writer.Write((ushort)dir.Fields.Count);
+            var tagCount = options.HasFlag(TiffOptions.StripUnknownTags)
+                ? dir.Fields.Count(x => x.Value.Tag != TiffTag.Unknown)
+                : dir.Fields.Count;
+            writer.Write((ushort)tagCount);
 
-            foreach (var field in dir.Fields)
+            foreach (var tag in dir.Fields)
             {
-                ((ITiffFieldInternal)field.Value).WriteEntry(writer);
+                if (tag.Value.Tag == TiffTag.Unknown && options.HasFlag(TiffOptions.StripUnknownTags))
+                    continue;
+                ((ITiffFieldInternal)tag.Value).WriteEntry(writer);
             }
 
             return new DirectoryBlock(ifdPos, writer.BaseStream.Position);
@@ -370,7 +384,8 @@ namespace Ephemera.Tiff
             for (var i = 0; i < numTags; ++i)
             {
                 var field = TiffFieldFactory.ReadField(reader);
-                if (field == null) continue;
+                if (field == null)
+                    continue;
 
                 fields[field.TagNum] = field;
 
@@ -426,6 +441,13 @@ namespace Ephemera.Tiff
             }
 
             jfifData = reader.ReadNBytes(jfifPointer, jfifLength);
+        }
+
+        /// <summary>
+        /// TiffDirectory does not need to be disposed; this was left in for backward-compatibility
+        /// </summary>
+        public void Dispose()
+        {
         }
     }
 }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using Ephemera.Tiff.Infrastructure;
 
@@ -10,6 +9,8 @@ namespace Ephemera.Tiff.Fields
     [DebuggerDisplay("{Tag} ({Type})")]
     internal sealed class SShortTiffField : TiffFieldBase<short>, ITiffFieldInternal
     {
+        public override bool IsComplex => Count > 2;
+
         internal SShortTiffField(ushort tag, TiffReader reader = null)
         {
             TagNum = tag;

@@ -8,6 +8,8 @@ namespace Ephemera.Tiff.Fields
     [DebuggerDisplay("{Tag} ({Type})")]
     internal class LongTiffField : TiffFieldBase<uint>,  ITiffFieldInternal
     {
+        public override bool IsComplex => Count > 1;
+
         internal LongTiffField(ushort tag, TiffReader reader = null)
         {
             TagNum = tag;
@@ -35,7 +37,22 @@ namespace Ephemera.Tiff.Fields
         {
             uint count = reader.ReadUInt32();
             Offset = reader.ReadUInt32();
-            Values = count > 1 ? reader.ReadNUInt32(Offset, count).ToList() : new List<uint> {Offset};
+
+            if (count > 1)
+            {
+                if (Offset >= reader.BaseStream.Length)
+                {
+                    Values = (new uint[count]).ToList();
+                }
+                else
+                {
+                    Values = reader.ReadNUInt32(Offset, count).ToList();
+                }
+            }
+            else
+            {
+                Values = new List<uint> { Offset };
+            }
         }
 
         protected override void WriteOffset(TiffWriter writer)

@@ -7,5 +7,6 @@ namespace Ephemera.Tiff
     {
         None = 0,
         ConvertOJPEGToJPEG = 1,
+        StripUnknownTags = 2
     }
 }

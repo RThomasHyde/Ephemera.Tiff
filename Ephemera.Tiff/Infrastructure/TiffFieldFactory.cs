@@ -24,7 +24,12 @@ namespace Ephemera.Tiff.Infrastructure
             }
 
             if (fieldFuncs.ContainsKey(tagType))
-                return fieldFuncs[tagType](tagNumber, reader);
+            {
+                var field = fieldFuncs[tagType](tagNumber, reader);
+                if (field.IsComplex && field.Offset >= reader.BaseStream.Length) 
+                    return null;
+                return field;
+            }
 
             return null;
         }
@@ -37,20 +42,20 @@ namespace Ephemera.Tiff.Infrastructure
             return fieldFuncs[(ushort)typeMap[typeCode]](tagNumber, null);
         }
 
-        private static readonly Dictionary<TypeCode, TiffFieldType> typeMap = 
+        private static readonly Dictionary<TypeCode, TiffFieldType> typeMap =
             new Dictionary<TypeCode, TiffFieldType>
-        {
-            [TypeCode.UInt16] = TiffFieldType.Short,
-            [TypeCode.Int16] = TiffFieldType.Long,
-            [TypeCode.UInt32] = TiffFieldType.SShort,
-            [TypeCode.Int32] = TiffFieldType.SLong,
-            [TypeCode.String] = TiffFieldType.ASCII,
-            [TypeCode.Single] = TiffFieldType.Float,
-            [TypeCode.Double] = TiffFieldType.Double,
-            [TypeCode.Byte] = TiffFieldType.Byte,
-            [TypeCode.SByte] = TiffFieldType.SByte,
-            [TypeCode.Decimal] = TiffFieldType.Rational
-        };
+            {
+                [TypeCode.UInt16] = TiffFieldType.Short,
+                [TypeCode.Int16] = TiffFieldType.Long,
+                [TypeCode.UInt32] = TiffFieldType.SShort,
+                [TypeCode.Int32] = TiffFieldType.SLong,
+                [TypeCode.String] = TiffFieldType.ASCII,
+                [TypeCode.Single] = TiffFieldType.Float,
+                [TypeCode.Double] = TiffFieldType.Double,
+                [TypeCode.Byte] = TiffFieldType.Byte,
+                [TypeCode.SByte] = TiffFieldType.SByte,
+                [TypeCode.Decimal] = TiffFieldType.Rational
+            };
 
         private static readonly Dictionary<ushort, Func<ushort, TiffReader, ITiffFieldInternal>> fieldFuncs =
             new Dictionary<ushort, Func<ushort, TiffReader, ITiffFieldInternal>>
