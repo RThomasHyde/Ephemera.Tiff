@@ -108,6 +108,7 @@
     <Grid AllowDrop="True" Drop="{s:Action DropFile}">
         <treeListView:TreeListView
             ChildrenPropertyName="Children"
+            ItemContainerStyle="{StaticResource TreeListViewItemNoSelection}"
             ItemsSource="{Binding Pages}"
             Style="{StaticResource VirtualizedMetroTreeListView}">
             <treeListView:TreeListView.View>
@@ -124,10 +125,24 @@
                         Width="80"
                         DisplayMemberBinding="{Binding Count}"
                         Header="Count" />
-                    <GridViewColumn
-                        Width="200"
-                        DisplayMemberBinding="{Binding Value}"
-                        Header="Value" />
+                    <GridViewColumn Width="200" Header="Value">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBox
+                                    MinHeight="22"
+                                    MaxHeight="60"
+                                    BorderThickness="0"
+                                    IsReadOnly="True"
+                                    Text="{Binding Value}"
+                                    TextWrapping="Wrap"
+                                    VerticalScrollBarVisibility="Auto">
+                                    <TextBox.ContextMenu>
+                                        <ContextMenu Visibility="Collapsed" />
+                                    </TextBox.ContextMenu>
+                                </TextBox>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
                     <GridViewColumn
                         Width="200"
                         DisplayMemberBinding="{Binding Offset}"

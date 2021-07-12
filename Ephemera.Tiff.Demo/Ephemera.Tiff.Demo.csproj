@@ -173,6 +173,7 @@
     <Compile Include="Extensions.cs" />
     <Compile Include="Model\TiffPage.cs" />
     <Compile Include="Model\Tag.cs" />
+    <Compile Include="TreeViewItemBehavior.cs" />
     <Compile Include="ViewModel\ShellViewModel.cs" />
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
