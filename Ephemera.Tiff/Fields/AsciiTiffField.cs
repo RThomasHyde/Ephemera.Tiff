@@ -11,8 +11,6 @@ namespace Ephemera.Tiff.Fields
     [DebuggerDisplay("{Tag} ({Type})")]
     internal sealed class AsciiTiffField : TiffFieldBase<string>, ITiffFieldInternal
     {
-        public override bool IsComplex => true;
-
         public override int Count
         {
             get { return Values.Sum(x => Encoding.ASCII.GetByteCount(x) + 1); }

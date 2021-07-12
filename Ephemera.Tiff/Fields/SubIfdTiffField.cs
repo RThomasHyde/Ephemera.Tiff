@@ -6,8 +6,6 @@ namespace Ephemera.Tiff.Fields
 {
     internal class SubIfdTiffField : LongTiffField, ITiffFieldInternal
     {
-        public override bool IsComplex => true;
-
         private readonly Dictionary<int, TiffDirectory> subIfds = new Dictionary<int, TiffDirectory>();
 
         public SubIfdTiffField(TiffReader reader) : base((ushort)TiffTag.SubIFDs, reader)

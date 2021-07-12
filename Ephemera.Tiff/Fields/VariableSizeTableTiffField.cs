@@ -9,8 +9,6 @@ namespace Ephemera.Tiff.Fields
     [DebuggerDisplay("{Tag} ({Type})")]
     internal class VariableSizeTableTiffField : LongTiffField, ITiffFieldInternal
     {
-        public override bool IsComplex => true;
-
         private readonly List<byte[]> tables = new List<byte[]>();
 
         public VariableSizeTableTiffField(ushort tag, TiffReader reader) : base(tag, reader) { }

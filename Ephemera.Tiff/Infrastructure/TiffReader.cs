@@ -51,6 +51,7 @@ namespace Ephemera.Tiff.Infrastructure
         public float[] ReadNSingles(uint offset, uint n, bool restore = true)
         {
             if (n == 0) return new float[0];
+            if (offset + (n * sizeof(float)) > BaseStream.Length) return new float[n];
             var pos = BaseStream.Position;
             BaseStream.Seek(offset, SeekOrigin.Begin);
             float[] result = new float[n];
@@ -70,6 +71,7 @@ namespace Ephemera.Tiff.Infrastructure
         public double[] ReadNDoubles(uint offset, uint n, bool restore = true)
         {
             if (n == 0) return new double[0];
+            if (offset + (n * sizeof(double)) > BaseStream.Length) return new double[n];
             var pos = BaseStream.Position;
             BaseStream.Seek(offset, SeekOrigin.Begin);
             var result = new double[n];
@@ -89,6 +91,7 @@ namespace Ephemera.Tiff.Infrastructure
         public short[] ReadNInt16(uint offset, uint n, bool restore = true)
         {
             if (n == 0) return new short[0];
+            if (offset + (n * sizeof(short)) > BaseStream.Length) return new short[n];
             var pos = BaseStream.Position;
             BaseStream.Seek(offset, SeekOrigin.Begin);
             short[] result = new short[n];
@@ -108,6 +111,7 @@ namespace Ephemera.Tiff.Infrastructure
         public ushort[] ReadNUInt16(uint offset, uint n, bool restore = true)
         {
             if (n == 0) return new ushort[0];
+            if (offset + (n * sizeof(ushort)) > BaseStream.Length) return new ushort[n];
             var pos = BaseStream.Position;
             BaseStream.Seek(offset, SeekOrigin.Begin);
             ushort[] result = new ushort[n];
@@ -127,6 +131,7 @@ namespace Ephemera.Tiff.Infrastructure
         public int[] ReadNInt32(uint offset, uint n, bool restore = true)
         {
             if (n == 0) return new int[0];
+            if (offset + (n * sizeof(int)) > BaseStream.Length) return new int[n];
             var pos = BaseStream.Position;
             BaseStream.Seek(offset, SeekOrigin.Begin);
             int[] result = new int[n];
@@ -146,6 +151,7 @@ namespace Ephemera.Tiff.Infrastructure
         public uint[] ReadNUInt32(uint offset, uint n, bool restore = true)
         {
             if (n == 0) return new uint[0];
+            if (offset + (n * sizeof(uint)) > BaseStream.Length) return new uint[n];
             var pos = BaseStream.Position;
             BaseStream.Seek(offset, SeekOrigin.Begin);
             uint[] result = new uint[n];
@@ -161,6 +167,7 @@ namespace Ephemera.Tiff.Infrastructure
             if (n == 0) return new byte[0];
             try
             {
+                if (offset + n > BaseStream.Length) return new byte[n];
                 var pos = BaseStream.Position;
                 BaseStream.Seek(offset, SeekOrigin.Begin);
                 var array = new byte[n];
@@ -179,6 +186,7 @@ namespace Ephemera.Tiff.Infrastructure
         public sbyte[] ReadNSBytes(uint offset, uint n, bool restore = true)
         {
             if (n == 0) return new sbyte[0];
+            if (offset + n > BaseStream.Length) return new sbyte[n];
             var pos = BaseStream.Position;
             BaseStream.Seek(offset, SeekOrigin.Begin);
             var array = new sbyte[n];

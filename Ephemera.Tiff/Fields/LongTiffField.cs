@@ -8,8 +8,6 @@ namespace Ephemera.Tiff.Fields
     [DebuggerDisplay("{Tag} ({Type})")]
     internal class LongTiffField : TiffFieldBase<uint>,  ITiffFieldInternal
     {
-        public override bool IsComplex => Count > 1;
-
         internal LongTiffField(ushort tag, TiffReader reader = null)
         {
             TagNum = tag;

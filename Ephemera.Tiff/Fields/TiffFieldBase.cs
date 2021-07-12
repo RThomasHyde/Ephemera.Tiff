@@ -10,7 +10,7 @@ namespace Ephemera.Tiff.Fields
         public virtual bool IsComplex => false;
         public ushort TagNum { get; protected set; }
         public ushort TypeNum { get; protected set; }
-        protected List<TValue> Values { get; set; }
+        protected List<TValue> Values { get; set; } = new List<TValue>();
         public virtual int Count => Values.Count;
 
         public TiffTag Tag

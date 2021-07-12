@@ -9,8 +9,6 @@ namespace Ephemera.Tiff.Fields
     [DebuggerDisplay("{Tag} ({Type})")]
     internal sealed class ByteTiffField : TiffFieldBase<byte>, ITiffFieldInternal
     {
-        public override bool IsComplex => Count > 4;
-
         internal ByteTiffField(ushort tag, TiffReader reader = null)
         {
             TagNum = tag;

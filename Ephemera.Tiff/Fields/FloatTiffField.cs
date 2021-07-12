@@ -9,8 +9,6 @@ namespace Ephemera.Tiff.Fields
     [DebuggerDisplay("{Tag} ({Type})")]
     internal sealed class FloatTiffField : TiffFieldBase<float>, ITiffFieldInternal
     {
-        public override bool IsComplex => Count > 1;
-
         internal FloatTiffField(ushort tag, TiffReader reader = null)
         {
             TagNum = tag;

@@ -170,6 +170,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Extensions.cs" />
     <Compile Include="Model\TiffPage.cs" />
     <Compile Include="Model\Tag.cs" />
     <Compile Include="ViewModel\ShellViewModel.cs" />

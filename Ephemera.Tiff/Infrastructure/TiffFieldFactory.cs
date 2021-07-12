@@ -26,8 +26,8 @@ namespace Ephemera.Tiff.Infrastructure
             if (fieldFuncs.ContainsKey(tagType))
             {
                 var field = fieldFuncs[tagType](tagNumber, reader);
-                if (field.IsComplex && field.Offset >= reader.BaseStream.Length) 
-                    return null;
+                //if (field.IsComplex && field.Offset >= reader.BaseStream.Length) 
+                //    return null;
                 return field;
             }
 

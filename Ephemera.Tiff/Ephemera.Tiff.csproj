@@ -65,7 +65,11 @@
     <Compile Include="Infrastructure\TiffWriter.cs" />
     <Compile Include="ITiffField.cs" />
     <Compile Include="Infrastructure\TiffConstants.cs" />
+    <Compile Include="NewSubfileType.cs" />
+    <Compile Include="Orientation.cs" />
     <Compile Include="PhotometricInterpretation.cs" />
+    <Compile Include="PlanarConfiguration.cs" />
+    <Compile Include="ResolutionUnit.cs" />
     <Compile Include="Threshholding.cs" />
     <Compile Include="TiffDirectory.cs" />
     <Compile Include="TiffDocument.cs" />
